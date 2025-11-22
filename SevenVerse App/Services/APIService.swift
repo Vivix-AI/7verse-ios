@@ -15,20 +15,21 @@ class APIService {
     
     // Fetch all posts for public feed (Home)
     func fetchAllPosts() async throws -> [Post] {
+        // Removed join with premium_details since the table doesn't exist yet
         let posts: [Post] = try await client
             .from("7verse_posts")
-            .select("*, 7verse_post_premium_details(*)")
+            .select("*") // Select all columns from 7verse_posts only
             .order("created_at", ascending: false)
             .execute()
             .value
         return posts
     }
     
-    // Fetch posts for a specific profile (String ID)
+    // Fetch posts for a specific profile (UUID)
     func fetchPosts(forProfileId profileId: String? = nil) async throws -> [Post] {
         var query = client
             .from("7verse_posts")
-            .select("*, 7verse_post_premium_details(*)")
+            .select("*")
         
         if let pid = profileId {
             query = query.eq("profile_id", value: pid)
@@ -41,7 +42,7 @@ class APIService {
         return posts
     }
     
-    // Fetch Profile Details (String ID)
+    // Fetch Profile Details (String ID -> UUID)
     func fetchProfile(id: String) async throws -> Profile {
         let profile: Profile = try await client
             .from("7verse_profiles")

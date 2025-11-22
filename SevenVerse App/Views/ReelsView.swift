@@ -7,7 +7,7 @@ struct ReelsView: View {
     var body: some View {
         GeometryReader { geometry in
             TabView(selection: $currentPostId) {
-                ForEach(viewModel.posts + viewModel.premiumPosts, id: \.id) { post in
+                ForEach(viewModel.posts, id: \.id) { post in
                     ReelItemView(post: post)
                         .frame(width: geometry.size.width, height: geometry.size.height)
                         .rotationEffect(.degrees(-90))
