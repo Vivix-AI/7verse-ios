@@ -23,8 +23,8 @@ DerivedData/
 
 # Config & Secrets
 #
-*.xcconfig
-SevenVerse App/Config/Config.xcconfig
+# *.xcconfig
+# SevenVerse App/Config/Config.xcconfig
 
 # CocoaPods
 #

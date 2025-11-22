@@ -1,0 +1,16 @@
+//
+//  Config.xcconfig
+//  SevenVerse App
+//
+//  Created by AI on 2025/11/21.
+//
+
+// Keys - In a real app, these would be populated from CI/CD or a secure local file.
+
+// --- Supabase ---
+SUPABASE_URL = https://bfbitffcqlerawiikhxa.supabase.co
+SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJmYml0ZmZjcWxlcmF3aWlraHhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUxNjAzMzEsImV4cCI6MjA3MDczNjMzMX0.X911q2XAdlwtG07gmf-f30hSrF5j7OUrufYvmqbLpSw
+
+// --- Google Cloud ---
+GCP_PROJECT_ID = vivix-465517
+GCS_BUCKET_NAME = 7verse-app-media-public
