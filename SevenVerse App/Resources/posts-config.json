@@ -1,0 +1,89 @@
+{
+  "posts": [
+    {
+      "id": "p-2025-09-25-gym-hair",
+      "date_iso": "2025-09-25",
+      "one_line": "Still getting used to the new hair 🤎 Loving this new gym fit — both the top and the leggings are a vibe.",
+      "hashtags": [
+        "#NewHairWhoDis",
+        "#GymFit",
+        "#FitCheck",
+        "#SoftStrength",
+        "#EverydayLooks"
+      ],
+      "photo_path": "/photos/20250925-0001.jpg",
+      "campaign_id": "0000_sofia_cn_0",
+      "is_premium": false,
+      "price_usd": null
+    },
+    {
+      "id": "p-2025-09-15-bikini",
+      "date_iso": "2025-09-15",
+      "one_line": "Looking for a bikini that actually fits and looks good, I got you ✨ I recently received this stunni",
+      "hashtags": [
+        "#BikiniSeason",
+        "#SwimwearEdit",
+        "#SummerStyle",
+        "#BeachBabeEnergy",
+        "#FitCheck"
+      ],
+      "photo_path": "/photos/20250915-0001.png",
+      "campaign_id": "0000_sofia_cn_1",
+      "is_premium": false,
+      "price_usd": null
+    },
+    {
+      "id": "p-2025-08-28-zeelool-closeup",
+      "date_iso": "2025-08-28",
+      "one_line": "Up close and personal with @zeelool 🐆🤎 So you can see all the beautiful details of one of m",
+      "hashtags": [
+        "#GlassesOn",
+        "#ZeeloolStyle",
+        "#CloseUpShot",
+        "#DetailLover",
+        "#EverydayLooks"
+      ],
+      "photo_path": "/photos/20250828-0001.jpg",
+      "campaign_id": "0000_sofia_cn_2",
+      "is_premium": false,
+      "price_usd": null
+    },
+    {
+      "id": "p-2025-08-10-zeelool-unboxing",
+      "date_iso": "2025-08-10",
+      "one_line": "Unboxing some amazing blue light and prescription glasses from @zeelool 💙✨ If you are lookin",
+      "hashtags": [
+        "#Unboxing",
+        "#ZeeloolGlasses",
+        "#BlueLightProtection",
+        "#GlassesHaul",
+        "#TechEssentials"
+      ],
+      "photo_path": "/photos/20250810-0001.png",
+      "campaign_id": "0000_sofia_cn_3",
+      "is_premium": false,
+      "price_usd": null
+    },
+    {
+      "id": "premium-01",
+      "date_iso": "2025-12-31",
+      "one_line": "Premium moment 01 — a deeper, more intimate side of Sofia.",
+      "hashtags": [],
+      "photo_path": "/photos/premium-01.jpg",
+      "campaign_id": "0000_sofia_cn_premium_0",
+      "is_premium": true,
+      "price_usd": "$9.99"
+    },
+    {
+      "id": "premium-02",
+      "date_iso": "2025-12-31",
+      "one_line": "Premium moment 02 — saved for the ones who really stay.",
+      "hashtags": [],
+      "photo_path": "/photos/premium-02.jpg",
+      "campaign_id": "0000_sofia_cn_premium_1",
+      "is_premium": true,
+      "price_usd": "$14.99"
+    }
+  ]
+}
+
