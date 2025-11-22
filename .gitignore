@@ -21,11 +21,6 @@ DerivedData/
 #
 .build/
 
-# Config & Secrets
-#
-# *.xcconfig
-# SevenVerse App/Config/Config.xcconfig
-
 # CocoaPods
 #
 # We recommend against checking in the Pods directory.
