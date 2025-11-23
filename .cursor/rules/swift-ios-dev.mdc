@@ -1,0 +1,94 @@
+---
+description: Swift and iOS development rules for 7verse app
+globs: 
+  - "**/*.swift"
+  - "**/*.storyboard"
+  - "**/*.xib"
+alwaysApply: true
+---
+
+You are an expert Swift and iOS developer working on the 7verse iOS app.
+
+## Execution Philosophy
+- Execute directly without asking for confirmation unless there's significant risk (data loss, destructive git operations)
+- When asked to "fix" or "implement", analyze and execute in one turn
+- Make reasonable assumptions and proceed
+- Minimize back-and-forth
+
+## Swift Development - Dev Build Mode
+The user is in development mode and wants ALL issues exposed immediately. No silent fallbacks.
+
+### Core Principles
+1. **Fail Fast**: Prefer crashes over silent failures. Use `fatalError()`, `precondition()`, and `assert()` liberally
+2. **Force Unwrap When Appropriate**: Use `!` instead of `??` when you expect data to exist. Let it crash with a clear stack trace
+3. **No Error Swallowing**: Never use `try?` or empty `catch {}` blocks. Always propagate or crash with details
+4. **Verbose Logging**: Add `print()` statements with clear prefixes to trace data flow, API calls, state changes
+5. **Type Safety**: Avoid `Any`, `AnyObject`. Make types explicit and narrow
+6. **No Default Values for Critical Data**: Don't use `?? []` or `?? ""` for data that should always exist
+
+### Example Patterns
+
+```swift
+// ❌ Production style (hides issues)
+let posts = try? await fetchPosts() ?? []
+
+// ✅ Dev style (exposes issues)
+do {
+    let posts = try await fetchPosts()
+    print("✅ Fetched \(posts.count) posts")
+} catch {
+    print("❌ FATAL: \(error)")
+    fatalError("Cannot load posts: \(error)")
+}
+```
+
+```swift
+// ❌ Silent fallback
+let hashtags = (try? container.decode([String].self, forKey: .hashtags)) ?? []
+
+// ✅ Fail fast with context
+let hashtags = try container.decode([String].self, forKey: .hashtags)
+// If this crashes, we know exactly what's wrong
+```
+
+### Conditional Compilation for Future
+When ready for production, wrap dev-mode crashes:
+```swift
+#if DEBUG
+fatalError("Dev: Data malformed")
+#else
+// Graceful fallback for production
+return []
+#endif
+```
+
+## Code Style
+- Swift conventions: camelCase for properties/methods, PascalCase for types
+- Prefer `let` over `var`
+- Use explicit `self` only when required
+- Keep functions small and focused
+- Use `// MARK: -` to organize code sections
+
+## SwiftUI Practices
+- Prefer SwiftUI over UIKit
+- Set `.preferredColorScheme()` explicitly during dev
+- Test on both iPhone and iPad simulators
+
+## Error Messages
+- Prefix all print statements with module/context: `[FeedViewModel]`, `[APIService]`, etc.
+- Use emoji for quick scanning: ✅ success, ❌ error, ⚠️ warning, 🔍 debug, 🔄 loading
+
+## Git Rules
+- NEVER force push to main/master
+- NEVER skip git hooks unless explicitly requested
+- Write clear, descriptive commit messages
+
+## File Organization
+- Models in `Models/`, Views in `Views/`, Services in `Services/`
+- Delete unused files immediately
+- No commented-out code or orphaned TODOs
+
+## File Restrictions
+- **NEVER edit .sql files** - SQL files are managed by the database team
+- **Read-only for .sql**: You can read .sql files to understand schema, but never modify them
+- If SQL changes are needed, inform the user and provide the SQL as suggestions only

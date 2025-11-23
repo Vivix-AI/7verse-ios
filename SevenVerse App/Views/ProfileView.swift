@@ -13,7 +13,7 @@ struct ProfileView: View {
         
         NavigationView {
             ZStack {
-                Color.white.ignoresSafeArea()
+                Color(uiColor: .systemGray6).ignoresSafeArea()
                 
                 List {
                     // Header Section

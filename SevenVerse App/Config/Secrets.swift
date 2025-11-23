@@ -17,7 +17,7 @@ enum Secrets {
     }
     
     static var gcsBucketName: String {
-        string(for: "GCS_BUCKET_NAME") ?? "demo-7verse"
+        string(for: "GCS_BUCKET_NAME") ?? "7verse-app-media-public"
     }
     
     static var gcpProjectId: String {

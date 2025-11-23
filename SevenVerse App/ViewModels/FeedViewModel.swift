@@ -22,30 +22,32 @@ class FeedViewModel: ObservableObject {
         errorMessage = nil
         
         do {
-            print("🔄 Loading feed data...")
+            print("🔄 [FeedViewModel] Loading feed data...")
             // 1. Fetch Public Feed (All Posts)
-            var allPosts = try await APIService.shared.fetchAllPosts()
-            print("✅ Successfully fetched \(allPosts.count) posts from Supabase")
+            let allPosts = try await APIService.shared.fetchAllPosts()
+            print("✅ [FeedViewModel] Successfully fetched \(allPosts.count) posts from Supabase")
             
             if allPosts.isEmpty {
-                print("⚠️ Warning: Post array is empty. Check RLS policies or DB content.")
+                print("⚠️ [FeedViewModel] Post array is empty. Check RLS policies or DB content.")
             }
             
             // 2. Loop Logic: Duplicate content to simulate infinite feed
+            var expandedPosts = allPosts
             if feedLoopCount > 0 && !allPosts.isEmpty {
                 let originalPosts = allPosts
                 for _ in 0..<feedLoopCount {
-                    // Create copies with new IDs to satisfy Identifiable
                     let duplicates = originalPosts.map { $0.copyWithNewId() }
-                    allPosts.append(contentsOf: duplicates)
+                    expandedPosts.append(contentsOf: duplicates)
                 }
+                print("✅ [FeedViewModel] Looped posts \(feedLoopCount) times, total: \(expandedPosts.count)")
             }
             
-            self.posts = allPosts
+            self.posts = expandedPosts
             
         } catch {
-            print("Failed to load feed: \(error)")
+            print("❌ [FeedViewModel] FATAL: Failed to load feed - \(error)")
             self.errorMessage = "Failed to load feed: \(error.localizedDescription)"
+            fatalError("Cannot load feed data: \(error)")
         }
         
         self.isLoading = false

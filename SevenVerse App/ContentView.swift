@@ -30,21 +30,11 @@ struct LoginView: View {
                 Image("Logo")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 200, height: 200)
+                    .frame(width: 300, height: 300)
                     .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
                 Spacer()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            // Offset y by -100 (half of height) to make bottom align with center
-            // Or simply use an alignment guide if we want to be precise.
-            // The easiest way to match LaunchScreen "Bottom -> CenterY" constraint:
-            // Place it in a VStack with Spacer, then offset it up by half its height? No.
-            // LaunchScreen constraint: Image.Bottom == Superview.CenterY.
-            // This means the entire image is ABOVE the center line.
-            
-            // In SwiftUI ZStack(alignment: .center) puts the center of image at center of screen.
-            // To align bottom to center: offset y = -height/2
-            .offset(y: -100)
             
             // 2. Action Layer - Button at bottom
             VStack {
