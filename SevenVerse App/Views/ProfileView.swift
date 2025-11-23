@@ -82,7 +82,7 @@ struct ProfileView: View {
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .foregroundColor(.black)
                             }
-                            .navigationBarHidden(true) 
+                            .commonNavigationHeader(title: "Terms of Use")
                             .background(Color.white)
                         }
                         
@@ -114,7 +114,7 @@ struct ProfileView: View {
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .foregroundColor(.black)
                             }
-                            .navigationBarHidden(true)
+                            .commonNavigationHeader(title: "Privacy Policy")
                             .background(Color.white)
                         }
                         
