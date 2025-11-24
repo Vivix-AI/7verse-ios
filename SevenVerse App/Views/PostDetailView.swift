@@ -367,8 +367,34 @@ struct PostDetailCarouselView: View {
                                             // Right: CTA Button
                                             if let ctaUrl = currentProfilePost.ctaUrl, !ctaUrl.isEmpty {
                                                 Button(action: {
-                                                    webViewURL = ctaUrl
-                                                    showWebView = true
+                                                    // Safely get current post at click time (not from closure)
+                                                    print("🔍 [CTA] Button tapped - profileIndex: \(profileIndex)")
+                                                    print("🔍 [CTA] currentPostIndices[\(profileIndex)]: \(currentPostIndices.indices.contains(profileIndex) ? currentPostIndices[profileIndex] : -1)")
+                                                    print("🔍 [CTA] ctaUrl from view: \(ctaUrl)")
+                                                    
+                                                    // Get fresh post data at click time
+                                                    guard currentPostIndices.indices.contains(profileIndex) else {
+                                                        print("❌ [CTA] Invalid profileIndex: \(profileIndex)")
+                                                        return
+                                                    }
+                                                    
+                                                    let posts = postsForThisProfile
+                                                    let postIdx = currentPostIndices[profileIndex]
+                                                    
+                                                    guard posts.indices.contains(postIdx) else {
+                                                        print("❌ [CTA] Invalid postIndex: \(postIdx)")
+                                                        return
+                                                    }
+                                                    
+                                                    let freshPost = posts[postIdx]
+                                                    
+                                                    if let freshCtaUrl = freshPost.ctaUrl, !freshCtaUrl.isEmpty {
+                                                        print("✅ [CTA] Setting webViewURL: \(freshCtaUrl)")
+                                                        webViewURL = freshCtaUrl
+                                                        showWebView = true
+                                                    } else {
+                                                        print("❌ [CTA] No valid CTA URL found in fresh post")
+                                                    }
                                                 }) {
                                                     HStack(spacing: 6) {
                                                         Image(systemName: "hand.tap")
@@ -538,8 +564,51 @@ struct PostDetailCarouselView: View {
                 }
             }
             .sheet(isPresented: $showWebView) {
-                if let urlString = webViewURL, let url = URL(string: urlString) {
-                    WebViewSheet(url: url)
+                if let urlString = webViewURL, !urlString.isEmpty {
+                    print("🌐 [WebView Sheet] Opening with URL: \(urlString)")
+                    if let url = URL(string: urlString) {
+                        WebViewSheet(url: url)
+                    } else {
+                        print("❌ [WebView Sheet] Invalid URL format: \(urlString)")
+                        // Error state for invalid URL
+                        VStack(spacing: 16) {
+                            Image(systemName: "exclamationmark.triangle")
+                                .font(.system(size: 50))
+                                .foregroundColor(.red)
+                            Text("Invalid URL")
+                                .font(.headline)
+                            Text(urlString)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal)
+                            Button("Close") {
+                                showWebView = false
+                            }
+                            .buttonStyle(.borderedProminent)
+                        }
+                        .padding()
+                    }
+                } else {
+                    print("❌ [WebView Sheet] No URL provided - webViewURL: \(String(describing: webViewURL))")
+                    // Error state for missing URL
+                    VStack(spacing: 16) {
+                        Image(systemName: "link.slash")
+                            .font(.system(size: 50))
+                            .foregroundColor(.gray)
+                        Text("No URL Available")
+                            .font(.headline)
+                        Text("The interaction link is not available for this post.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                        Button("Close") {
+                            showWebView = false
+                        }
+                        .buttonStyle(.borderedProminent)
+                    }
+                    .padding()
                 }
             }
             .onDisappear {

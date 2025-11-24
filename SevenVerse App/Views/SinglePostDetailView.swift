@@ -68,8 +68,18 @@ struct SinglePostDetailView: View {
                         // Right: CTA Button
                         if let ctaUrl = post.ctaUrl, !ctaUrl.isEmpty {
                             Button(action: {
-                                webViewURL = ctaUrl
-                                showWebView = true
+                                print("🔍 [SinglePost CTA] Button tapped")
+                                print("🔍 [SinglePost CTA] Post ID: \(post.id)")
+                                print("🔍 [SinglePost CTA] CTA URL: \(ctaUrl)")
+                                
+                                // Validate URL before setting
+                                if !ctaUrl.isEmpty, URL(string: ctaUrl) != nil {
+                                    print("✅ [SinglePost CTA] Setting webViewURL: \(ctaUrl)")
+                                    webViewURL = ctaUrl
+                                    showWebView = true
+                                } else {
+                                    print("❌ [SinglePost CTA] Invalid CTA URL: \(ctaUrl)")
+                                }
                             }) {
                                 HStack(spacing: 6) {
                                     Image(systemName: "hand.tap")
@@ -119,8 +129,51 @@ struct SinglePostDetailView: View {
         }
         .ignoresSafeArea()
         .sheet(isPresented: $showWebView) {
-            if let urlString = webViewURL, let url = URL(string: urlString) {
-                WebViewSheet(url: url)
+            if let urlString = webViewURL, !urlString.isEmpty {
+                print("🌐 [SinglePost WebView] Opening with URL: \(urlString)")
+                if let url = URL(string: urlString) {
+                    WebViewSheet(url: url)
+                } else {
+                    print("❌ [SinglePost WebView] Invalid URL format: \(urlString)")
+                    // Error state for invalid URL
+                    VStack(spacing: 16) {
+                        Image(systemName: "exclamationmark.triangle")
+                            .font(.system(size: 50))
+                            .foregroundColor(.red)
+                        Text("Invalid URL")
+                            .font(.headline)
+                        Text(urlString)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                        Button("Close") {
+                            showWebView = false
+                        }
+                        .buttonStyle(.borderedProminent)
+                    }
+                    .padding()
+                }
+            } else {
+                print("❌ [SinglePost WebView] No URL provided - webViewURL: \(String(describing: webViewURL))")
+                // Error state for missing URL
+                VStack(spacing: 16) {
+                    Image(systemName: "link.slash")
+                        .font(.system(size: 50))
+                        .foregroundColor(.gray)
+                    Text("No URL Available")
+                        .font(.headline)
+                    Text("The interaction link is not available for this post.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                    Button("Close") {
+                        showWebView = false
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+                .padding()
             }
         }
         .sheet(isPresented: $showShareSheet) {
