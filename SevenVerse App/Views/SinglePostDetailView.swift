@@ -129,20 +129,45 @@ struct SinglePostDetailView: View {
         }
         .ignoresSafeArea()
         .sheet(isPresented: $showWebView) {
-            if let urlString = webViewURL, !urlString.isEmpty {
-                print("🌐 [SinglePost WebView] Opening with URL: \(urlString)")
-                if let url = URL(string: urlString) {
-                    WebViewSheet(url: url)
+            Group {
+                if let urlString = webViewURL, !urlString.isEmpty {
+                    if let url = URL(string: urlString) {
+                        WebViewSheet(url: url)
+                            .onAppear {
+                                print("🌐 [SinglePost WebView] Opening with URL: \(urlString)")
+                            }
+                    } else {
+                        // Error state for invalid URL
+                        VStack(spacing: 16) {
+                            Image(systemName: "exclamationmark.triangle")
+                                .font(.system(size: 50))
+                                .foregroundColor(.red)
+                            Text("Invalid URL")
+                                .font(.headline)
+                            Text(urlString)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal)
+                            Button("Close") {
+                                showWebView = false
+                            }
+                            .buttonStyle(.borderedProminent)
+                        }
+                        .padding()
+                        .onAppear {
+                            print("❌ [SinglePost WebView] Invalid URL format: \(urlString)")
+                        }
+                    }
                 } else {
-                    print("❌ [SinglePost WebView] Invalid URL format: \(urlString)")
-                    // Error state for invalid URL
+                    // Error state for missing URL
                     VStack(spacing: 16) {
-                        Image(systemName: "exclamationmark.triangle")
+                        Image(systemName: "link.slash")
                             .font(.system(size: 50))
-                            .foregroundColor(.red)
-                        Text("Invalid URL")
+                            .foregroundColor(.gray)
+                        Text("No URL Available")
                             .font(.headline)
-                        Text(urlString)
+                        Text("The interaction link is not available for this post.")
                             .font(.caption)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
@@ -153,27 +178,10 @@ struct SinglePostDetailView: View {
                         .buttonStyle(.borderedProminent)
                     }
                     .padding()
-                }
-            } else {
-                print("❌ [SinglePost WebView] No URL provided - webViewURL: \(String(describing: webViewURL))")
-                // Error state for missing URL
-                VStack(spacing: 16) {
-                    Image(systemName: "link.slash")
-                        .font(.system(size: 50))
-                        .foregroundColor(.gray)
-                    Text("No URL Available")
-                        .font(.headline)
-                    Text("The interaction link is not available for this post.")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                    Button("Close") {
-                        showWebView = false
+                    .onAppear {
+                        print("❌ [SinglePost WebView] No URL provided - webViewURL: \(String(describing: webViewURL))")
                     }
-                    .buttonStyle(.borderedProminent)
                 }
-                .padding()
             }
         }
         .sheet(isPresented: $showShareSheet) {
