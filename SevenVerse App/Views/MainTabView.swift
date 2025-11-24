@@ -39,7 +39,7 @@ struct MainTabView: View {
                 
                 HStack(spacing: 0) {
                     // Home Icon
-                    TabBarButton(icon: "house.fill", isSelected: selectedTab == .home) {
+                    TabBarButton(icon: "play.circle", isSelected: selectedTab == .home) {
                         selectedTab = .home
                     }
                     

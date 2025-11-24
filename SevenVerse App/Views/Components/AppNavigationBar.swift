@@ -6,8 +6,12 @@ struct AppNavigationBar: View {
     let leftContent: LeftContent
     let showSearch: Bool
     let showNotifications: Bool
+    let showShare: Bool
+    let backgroundColor: Color
+    let iconColor: Color
     let onSearchTap: (() -> Void)?
     let onNotificationTap: (() -> Void)?
+    let onShareTap: (() -> Void)?
     
     enum LeftContent {
         case logo
@@ -19,14 +23,22 @@ struct AppNavigationBar: View {
         leftContent: LeftContent = .logo,
         showSearch: Bool = false,
         showNotifications: Bool = false,
+        showShare: Bool = false,
+        backgroundColor: Color = .white,
+        iconColor: Color = .black,
         onSearchTap: (() -> Void)? = nil,
-        onNotificationTap: (() -> Void)? = nil
+        onNotificationTap: (() -> Void)? = nil,
+        onShareTap: (() -> Void)? = nil
     ) {
         self.leftContent = leftContent
         self.showSearch = showSearch
         self.showNotifications = showNotifications
+        self.showShare = showShare
+        self.backgroundColor = backgroundColor
+        self.iconColor = iconColor
         self.onSearchTap = onSearchTap
         self.onNotificationTap = onNotificationTap
+        self.onShareTap = onShareTap
     }
     
     var body: some View {
@@ -55,8 +67,9 @@ struct AppNavigationBar: View {
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 20, weight: .medium))
-                        .foregroundColor(.black)
+                        .foregroundColor(iconColor)
                         .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
                 }
                 .padding(.leading, 4)
             }
@@ -64,14 +77,28 @@ struct AppNavigationBar: View {
             Spacer()
             
             // Right Actions
-            HStack(spacing: 12) {
+            HStack(spacing: 4) {
+                if showShare {
+                    Button(action: {
+                        onShareTap?()
+                    }) {
+                        Image(systemName: "arrow.turn.up.right")
+                            .font(.system(size: 20))
+                            .foregroundColor(iconColor)
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
+                    }
+                }
+                
                 if showNotifications {
                     Button(action: {
                         onNotificationTap?()
                     }) {
                         Image(systemName: "bell")
                             .font(.system(size: 20))
-                            .foregroundColor(.black)
+                            .foregroundColor(iconColor)
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
                     }
                 }
                 
@@ -81,15 +108,16 @@ struct AppNavigationBar: View {
                     }) {
                         Image(systemName: "magnifyingglass")
                             .font(.system(size: 20))
-                            .foregroundColor(.black)
+                            .foregroundColor(iconColor)
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
                     }
                 }
             }
-            .padding(.trailing, 12)
+            .padding(.trailing, 4)
         }
         .frame(height: 44)
-        .background(Color.white)
-        .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+        .background(backgroundColor)
     }
 }
 

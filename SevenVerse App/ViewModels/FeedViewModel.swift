@@ -9,7 +9,7 @@ class FeedViewModel: ObservableObject {
     @Published var errorMessage: String?
     
     // Macro for loop count (0 means no loop, 5 means repeat 5 times)
-    private let feedLoopCount = 5
+    private let feedLoopCount = 0 // Debug mode: show only real data
     private var loadTask: Task<Void, Never>?
     
     init() {
@@ -26,8 +26,12 @@ class FeedViewModel: ObservableObject {
     // MARK: - Data Processing
     
     private func updateGroupedPosts() {
+        print("🔄 [FeedViewModel] updateGroupedPosts() called")
+        print("🔄 [FeedViewModel] Input posts.count: \(posts.count)")
+        
         // Group by profileId
         let groupedDict = Dictionary(grouping: posts, by: { $0.profileId })
+        print("🔄 [FeedViewModel] Grouped into \(groupedDict.count) profiles")
         
         // Sort profiles by their most recent post date (descending)
         let sortedGroups = groupedDict.values.sorted { group1, group2 in
@@ -39,6 +43,16 @@ class FeedViewModel: ObservableObject {
         // Ensure posts within each profile are also sorted (descending)
         self.groupedPosts = sortedGroups.map { group in
             group.sorted { $0.createdAt > $1.createdAt }
+        }
+        
+        print("✅ [FeedViewModel] groupedPosts.count: \(self.groupedPosts.count)")
+        for (index, group) in self.groupedPosts.enumerated() {
+            let profileName = group.first?.profile?.profileName ?? "Unknown"
+            print("   Profile \(index): \(profileName) - \(group.count) posts")
+            for (postIndex, post) in group.enumerated() {
+                let ctaStatus = post.ctaUrl != nil ? "✅ CTA: \(post.ctaUrl!)" : "❌ No CTA"
+                print("      Post \(postIndex): \(post.id) - \(ctaStatus)")
+            }
         }
     }
     
@@ -76,6 +90,10 @@ class FeedViewModel: ObservableObject {
                 self.posts = expandedPosts
                 // Update grouped data immediately
                 updateGroupedPosts()
+                
+                print("✅ [FeedViewModel] Data loaded successfully")
+                print("✅ [FeedViewModel] posts.count: \(self.posts.count)")
+                print("✅ [FeedViewModel] groupedPosts.count: \(self.groupedPosts.count)")
             }
             
         } catch is CancellationError {

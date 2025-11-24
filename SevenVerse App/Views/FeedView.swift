@@ -1,9 +1,13 @@
 import SwiftUI
 
+// Wrapper to make UUID Identifiable for fullScreenCover
+struct IdentifiableUUID: Identifiable {
+    let id: UUID
+}
+
 struct FeedView: View {
     @ObservedObject var viewModel: FeedViewModel
-    @State private var selectedPostId: UUID?
-    @State private var showPostDetail = false
+    @State private var selectedPostId: IdentifiableUUID? // For fullScreenCover item binding
     
     var body: some View {
         NavigationView {
@@ -42,18 +46,16 @@ struct FeedView: View {
                                 ForEach(viewModel.posts) { post in
                                     Button(action: {
                                         print("🟢 [FeedView] Tapped post ID: \(post.id)")
-                                        print("🟢 [FeedView] posts.count: \(viewModel.posts.count)")
                                         print("🟢 [FeedView] groupedPosts.count: \(viewModel.groupedPosts.count)")
                                         
-                                        selectedPostId = post.id
-                                        
-                                        print("🟢 [FeedView] selectedPostId NOW: \(selectedPostId?.uuidString ?? "STILL NIL!")")
-                                        
-                                        // Add slight delay to ensure state update
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                            print("🟢 [FeedView] About to show detail, selectedPostId: \(selectedPostId?.uuidString ?? "NIL!")")
-                                            showPostDetail = true
+                                        // Check if groupedPosts is ready
+                                        guard !viewModel.groupedPosts.isEmpty else {
+                                            print("❌ [FeedView] groupedPosts is empty! Cannot open detail.")
+                                            return
                                         }
+                                        
+                                        // Set selectedPostId to trigger fullScreenCover
+                                        selectedPostId = IdentifiableUUID(id: post.id)
                                     }) {
                                         PostGridItem(post: post)
                                     }
@@ -76,66 +78,36 @@ struct FeedView: View {
         }
         .navigationViewStyle(.stack)
         .preferredColorScheme(.light)
-        .fullScreenCover(isPresented: $showPostDetail) {
-            if let postId = selectedPostId {
+        .fullScreenCover(item: $selectedPostId) { identifiablePostId in
+            // Use item binding - more reliable than isPresented
+            if !viewModel.groupedPosts.isEmpty {
                 PostDetailView(
                     groupedPosts: viewModel.groupedPosts,
-                    initialPostId: postId,
-                    isPresented: $showPostDetail
+                    initialPostId: identifiablePostId.id,
+                    isPresented: Binding(
+                        get: { selectedPostId != nil },
+                        set: { if !$0 { selectedPostId = nil } }
+                    )
                 )
                 .onAppear {
-                    print("✅ [FeedView] fullScreenCover presenting with postId: \(postId)")
+                    print("✅ [FeedView] PostDetailView appeared with postId: \(identifiablePostId.id)")
                 }
             } else {
+                // Error state
                 ZStack {
                     Color.red.ignoresSafeArea()
-                    
-                    VStack(spacing: 20) {
-                        // Top Navigation Bar
-                        HStack {
-                            Button(action: {
-                                showPostDetail = false
-                            }) {
-                                HStack(spacing: 4) {
-                                    Image(systemName: "chevron.left")
-                                    Text("Back")
-                                }
-                                .foregroundColor(.white)
-                                .padding()
-                            }
-                            Spacer()
+                    VStack(spacing: 16) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.system(size: 60))
+                            .foregroundColor(.white)
+                        Text("ERROR: Data not ready")
+                            .font(.title)
+                            .foregroundColor(.white)
+                        Button("Close") {
+                            selectedPostId = nil
                         }
-                        .background(Color.black.opacity(0.3))
-                        
-                        Spacer()
-                        
-                        // Error Content
-                        VStack(spacing: 16) {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .font(.system(size: 60))
-                                .foregroundColor(.white)
-                            
-                            Text("ERROR: No Post ID")
-                                .font(.title)
-                                .foregroundColor(.white)
-                            
-                            Text("selectedPostId is nil")
-                                .font(.caption)
-                                .foregroundColor(.white.opacity(0.8))
-                            
-                            Button("Close") {
-                                showPostDetail = false
-                            }
-                            .buttonStyle(.borderedProminent)
-                            .tint(.white)
-                        }
-                        
-                        Spacer()
+                        .buttonStyle(.borderedProminent)
                     }
-                }
-                .onAppear {
-                    print("❌ [FeedView] fullScreenCover ERROR: selectedPostId is nil!")
-                    print("❌ [FeedView] showPostDetail: \(showPostDetail)")
                 }
             }
         }

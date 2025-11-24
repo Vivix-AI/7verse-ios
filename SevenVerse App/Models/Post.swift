@@ -11,7 +11,19 @@ struct Post: Identifiable, Codable, Hashable {
     let ctaUrl: String?
     let isPremium: Bool
     let views: Int
+    let likesCount: Int
+    let greetingsVideo: GreetingsVideo?
     let profile: Profile?
+    
+    struct GreetingsVideo: Codable, Hashable {
+        let videos: [VideoItem]
+        
+        struct VideoItem: Codable, Hashable {
+            let url: String
+            let duration: Double?
+            let thumbnail: String?
+        }
+    }
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -24,6 +36,8 @@ struct Post: Identifiable, Codable, Hashable {
         case ctaUrl = "cta_url"
         case isPremium = "is_premium"
         case views
+        case likesCount = "likes_count"
+        case greetingsVideo = "greetings_video"
         case profile = "7verse_profiles"
     }
     
@@ -39,6 +53,8 @@ struct Post: Identifiable, Codable, Hashable {
         ctaUrl = try container.decodeIfPresent(String.self, forKey: .ctaUrl)
         isPremium = try container.decode(Bool.self, forKey: .isPremium)
         views = (try? container.decode(Int.self, forKey: .views)) ?? 0
+        likesCount = (try? container.decode(Int.self, forKey: .likesCount)) ?? 0
+        greetingsVideo = try? container.decodeIfPresent(GreetingsVideo.self, forKey: .greetingsVideo)
         profile = try container.decodeIfPresent(Profile.self, forKey: .profile)
         
         // Date Decoding - FAIL FAST if format is wrong
@@ -80,7 +96,7 @@ struct Post: Identifiable, Codable, Hashable {
     }
     
     // Standard Init
-    init(id: UUID, profileId: UUID, createdAt: Date, caption: String, hashtags: [String], imageUrl: String, thumbnailUrl: String?, ctaUrl: String?, isPremium: Bool, views: Int, profile: Profile?) {
+    init(id: UUID, profileId: UUID, createdAt: Date, caption: String, hashtags: [String], imageUrl: String, thumbnailUrl: String?, ctaUrl: String?, isPremium: Bool, views: Int, likesCount: Int, greetingsVideo: GreetingsVideo?, profile: Profile?) {
         self.id = id
         self.profileId = profileId
         self.createdAt = createdAt
@@ -91,6 +107,8 @@ struct Post: Identifiable, Codable, Hashable {
         self.ctaUrl = ctaUrl
         self.isPremium = isPremium
         self.views = views
+        self.likesCount = likesCount
+        self.greetingsVideo = greetingsVideo
         self.profile = profile
     }
     
@@ -112,6 +130,17 @@ struct Post: Identifiable, Codable, Hashable {
         }
     }
     
+    var displayLikes: String {
+        if likesCount >= 1_000_000 {
+            return String(format: "%.1fM", Double(likesCount) / 1_000_000.0)
+        } else if likesCount >= 1_000 {
+            return String(format: "%.1fK", Double(likesCount) / 1_000.0)
+        } else {
+            return "\(likesCount)"
+        }
+    }
+    
+    
     // MARK: - Copy Helper
     
     func copyWithNewId() -> Post {
@@ -126,7 +155,15 @@ struct Post: Identifiable, Codable, Hashable {
             ctaUrl: self.ctaUrl,
             isPremium: self.isPremium,
             views: self.views,
+            likesCount: self.likesCount,
+            greetingsVideo: self.greetingsVideo,
             profile: self.profile
         )
+    }
+    
+    // Get a random greeting video (shuffle strategy)
+    func randomGreetingVideo() -> GreetingsVideo.VideoItem? {
+        guard let videos = greetingsVideo?.videos, !videos.isEmpty else { return nil }
+        return videos.randomElement()
     }
 }
