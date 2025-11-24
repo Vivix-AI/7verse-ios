@@ -677,76 +677,29 @@ struct FlowLayout: Layout {
 struct WebViewSheet: View {
     let url: URL
     @Environment(\.dismiss) private var dismiss
-    @State private var showControls = true
-    @State private var dragOffset: CGFloat = 0
     
     var body: some View {
-        ZStack {
-            // Black background for true immersion
-            Color.black
-                .ignoresSafeArea()
-            
-            // Full screen WebView
-            WebView(url: url)
-                .ignoresSafeArea()
-                .background(Color.black)
-                .onTapGesture {
-                    // Tap to toggle controls
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        showControls.toggle()
-                    }
-                }
-                .simultaneousGesture(
-                    // Drag down from top to dismiss
-                    DragGesture(minimumDistance: 20)
-                        .onChanged { value in
-                            // Only allow drag from top 100pt of screen
-                            if value.startLocation.y < 100 && value.translation.height > 0 {
-                                dragOffset = value.translation.height
-                            }
-                        }
-                        .onEnded { value in
-                            if value.translation.height > 150 {
-                                dismiss()
-                            } else {
-                                withAnimation(.spring(response: 0.3)) {
-                                    dragOffset = 0
-                                }
-                            }
-                        }
-                )
-                .offset(y: dragOffset)
-                .opacity(1 - Double(dragOffset / 500))
-            
-            // Floating close button with better positioning
-            if showControls {
-                VStack {
-                    HStack {
-                        Button(action: {
-                            dismiss()
-                        }) {
-                            ZStack {
-                                Circle()
-                                    .fill(Color.black.opacity(0.7))
-                                    .frame(width: 44, height: 44)
-                                
-                                Image(systemName: "xmark")
-                                    .font(.system(size: 18, weight: .semibold))
-                                    .foregroundColor(.white)
-                            }
-                        }
-                        .padding(.leading, 16)
-                        .padding(.top, 16)
-                        
-                        Spacer()
-                    }
-                    
-                    Spacer()
-                }
-                .transition(.opacity)
+        NavigationView {
+            ZStack {
+                // Black background
+                Color.black
+                    .ignoresSafeArea()
+                
+                WebView(url: url)
+                    .background(Color.black)
             }
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Close") {
+                        dismiss()
+                    }
+                    .foregroundColor(.white)
+                }
+            }
+            .toolbarBackground(.black, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
         }
-        .statusBarHidden(true) // Hide status bar for true fullscreen
         .preferredColorScheme(.dark)
     }
 }
@@ -769,8 +722,7 @@ struct WebView: UIViewRepresentable {
         webView.navigationDelegate = context.coordinator
         webView.uiDelegate = context.coordinator // Enable UI delegate for permissions
         
-        // Immersive fullscreen experience
-        webView.scrollView.contentInsetAdjustmentBehavior = .never
+        // Black background theme
         webView.isOpaque = false
         webView.backgroundColor = .black
         webView.scrollView.backgroundColor = .black
