@@ -3,6 +3,7 @@ import Combine
 
 class FeedViewModel: ObservableObject {
     @Published var posts: [Post] = []
+    @Published var groupedPosts: [[Post]] = [] // Pre-calculated for detail view
     @Published var isLoading = false
     @Published var currentProfile: Profile?
     @Published var errorMessage: String?
@@ -12,6 +13,7 @@ class FeedViewModel: ObservableObject {
     private var loadTask: Task<Void, Never>?
     
     init() {
+        // Removed cache loading - always fetch fresh data
         loadTask = Task {
             await loadData()
         }
@@ -21,8 +23,29 @@ class FeedViewModel: ObservableObject {
         loadTask?.cancel()
     }
     
+    // MARK: - Data Processing
+    
+    private func updateGroupedPosts() {
+        // Group by profileId
+        let groupedDict = Dictionary(grouping: posts, by: { $0.profileId })
+        
+        // Sort profiles by their most recent post date (descending)
+        let sortedGroups = groupedDict.values.sorted { group1, group2 in
+            let date1 = group1.first?.createdAt ?? Date.distantPast
+            let date2 = group2.first?.createdAt ?? Date.distantPast
+            return date1 > date2
+        }
+        
+        // Ensure posts within each profile are also sorted (descending)
+        self.groupedPosts = sortedGroups.map { group in
+            group.sorted { $0.createdAt > $1.createdAt }
+        }
+    }
+    
+    // MARK: - Data Loading
+    
     @MainActor
-    func loadData() async {
+    func loadData(forceRefresh: Bool = false) async {
         // Prevent multiple simultaneous loads
         guard !isLoading else {
             print("⚠️ [FeedViewModel] Load already in progress, skipping")
@@ -33,32 +56,27 @@ class FeedViewModel: ObservableObject {
         errorMessage = nil
         
         do {
-            print("🔄 [FeedViewModel] Loading feed data...")
-            
-            // 1. Fetch Public Feed (All Posts)
+            // Fetch Public Feed (All Posts)
             let allPosts = try await APIService.shared.fetchAllPosts()
-            print("✅ [FeedViewModel] Successfully fetched \(allPosts.count) posts from Supabase")
             
             if allPosts.isEmpty {
                 print("⚠️ [FeedViewModel] Post array is empty.")
-                print("💡 [FeedViewModel] Possible reasons:")
-                print("   - Database table '7verse_posts' has no data")
-                print("   - Check Supabase dashboard to verify data exists")
                 self.errorMessage = "No posts found. Please check database."
-            }
-            
-            // 2. Loop Logic: Duplicate content to simulate infinite feed
-            var expandedPosts = allPosts
-            if feedLoopCount > 0 && !allPosts.isEmpty {
-                let originalPosts = allPosts
-                for _ in 0..<feedLoopCount {
-                    let duplicates = originalPosts.map { $0.copyWithNewId() }
-                    expandedPosts.append(contentsOf: duplicates)
+            } else {
+                // Loop Logic: Duplicate content to simulate infinite feed
+                var expandedPosts = allPosts
+                if feedLoopCount > 0 && !allPosts.isEmpty {
+                    let originalPosts = allPosts
+                    for _ in 0..<feedLoopCount {
+                        let duplicates = originalPosts.map { $0.copyWithNewId() }
+                        expandedPosts.append(contentsOf: duplicates)
+                    }
                 }
-                print("✅ [FeedViewModel] Looped posts \(feedLoopCount) times, total: \(expandedPosts.count)")
+                
+                self.posts = expandedPosts
+                // Update grouped data immediately
+                updateGroupedPosts()
             }
-            
-            self.posts = expandedPosts
             
         } catch is CancellationError {
             print("⚠️ [FeedViewModel] Load was cancelled")
@@ -74,13 +92,19 @@ class FeedViewModel: ObservableObject {
             print("❌ [FeedViewModel] Failed to load feed - \(error)")
             self.errorMessage = "Failed to load feed: \(error.localizedDescription)"
             
-            // Don't crash in production, just show error
             #if DEBUG
             print("❌ [FeedViewModel] DEBUG MODE: Would crash in dev mode")
-            // fatalError("Cannot load feed data: \(error)")
             #endif
         }
         
         isLoading = false
+    }
+    
+    // MARK: - View Increment
+    
+    func incrementViews(for postId: UUID) async {
+        Task {
+            try? await APIService.shared.incrementPostViews(postId: postId)
+        }
     }
 }

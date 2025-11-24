@@ -8,15 +8,14 @@ class SupabaseManager {
     
     private init() {
         let url = Secrets.supabaseURL
-        let key = Secrets.supabaseServiceRoleKey // Using Service Role Key to bypass RLS
+        let key = Secrets.supabaseServiceRoleKey
         
-        print("🔍 [SupabaseManager] Initializing with URL: \(url)")
-        print("🔍 [SupabaseManager] Using Service Role Key (first 20 chars): \(key.prefix(20))...")
-        print("⚠️ [SupabaseManager] Service Role Key bypasses RLS - use with caution!")
-        
-        guard let supabaseURL = URL(string: url) else {
-            print("❌ [SupabaseManager] FATAL: Invalid Supabase URL")
-            fatalError("Invalid Supabase URL: \(url)")
+        // Validate URL before using it
+        guard let supabaseURL = URL(string: url), 
+              let host = supabaseURL.host,
+              host.contains("supabase.co") else {
+            print("❌ [SupabaseManager] Invalid Supabase URL")
+            fatalError("Invalid Supabase URL: '\(url)'")
         }
         
         self.client = SupabaseClient(
@@ -28,8 +27,6 @@ class SupabaseManager {
                 )
             )
         )
-        
-        print("✅ [SupabaseManager] Client initialized successfully with Service Role Key")
     }
 }
 

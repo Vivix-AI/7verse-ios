@@ -38,32 +38,28 @@ struct MainTabView: View {
                     .background(Color.gray.opacity(0.2))
                 
                 HStack(spacing: 0) {
-                    TabBarButton(icon: "play.rectangle", isSelected: selectedTab == .home) {
+                    // Home Icon
+                    TabBarButton(icon: "house.fill", isSelected: selectedTab == .home) {
                         selectedTab = .home
                     }
                     
                     Spacer()
-                    Spacer() // Double spacer for extra push
                     
+                    // Create Icon
                     TabBarButton(icon: "plus.app", isSelected: selectedTab == .create) {
                         selectedTab = .create
                     }
                     
                     Spacer()
-                    Spacer() // Double spacer for extra push
                     
+                    // Profile Icon
                     TabBarButton(icon: "person", isSelected: selectedTab == .profile) {
                         selectedTab = .profile
                     }
                 }
-                .padding(.horizontal, 60) // Increased horizontal padding to push items closer to center if needed, or reduce to push out
-                // To increase spacing BETWEEN items, we need to reduce horizontal padding so they can spread out more, 
-                // OR use fixed Spacers.
-                // If the user wants "gap between icons to be larger", pushing them apart means pushing them towards edges.
-                // So DECREASING padding .horizontal pushes them further apart.
-                .padding(.horizontal, 20) // Reduced from 40 to 20 to allow buttons to move further apart (increasing gap)
-                .padding(.top, 12)
-                .padding(.bottom, 34) // Approximate safe area for iPhone X+
+                .padding(.horizontal, 60) // Increased horizontal padding to bring icons closer together
+                .padding(.top, 6) // Compact top padding
+                .padding(.bottom, 24) // Compact bottom padding
                 .background(Color.white)
             }
         }
@@ -80,9 +76,9 @@ struct TabBarButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: icon)
-                .font(.system(size: 24, weight: isSelected ? .semibold : .regular)) // Slightly larger icons
+                .font(.system(size: 22, weight: isSelected ? .semibold : .regular)) // Slightly smaller for compact design
                 .foregroundColor(isSelected ? .black : .gray)
-                .frame(width: 44, height: 44) // Larger touch target
+                .frame(width: 44, height: 40) // Reduced height for more centered look
         }
     }
 }

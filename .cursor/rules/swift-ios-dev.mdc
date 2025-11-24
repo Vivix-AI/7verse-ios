@@ -92,3 +92,87 @@ return []
 - **NEVER edit .sql files** - SQL files are managed by the database team
 - **Read-only for .sql**: You can read .sql files to understand schema, but never modify them
 - If SQL changes are needed, inform the user and provide the SQL as suggestions only
+
+## Supabase Integration Best Practices
+
+### Critical Debugging Checklist
+
+When facing "0 results" from Supabase despite having data:
+
+1. **RLS (Row Level Security) Issues**
+   - Check if RLS is enabled: `SELECT tablename, rowsecurity FROM pg_tables WHERE tablename = 'your_table';`
+   - If enabled, verify policies exist for your role: `SELECT * FROM pg_policies WHERE tablename = 'your_table';`
+   - **Quick fix for dev**: `ALTER TABLE public."your_table" DISABLE ROW LEVEL SECURITY;`
+   - Service role key should bypass RLS, but policies may still block
+
+2. **API Key Validation**
+   ```swift
+   // Decode JWT to verify role
+   let jwtParts = key.split(separator: ".")
+   if let payload = Data(base64Encoded: String(jwtParts[1])) {
+       print(String(data: payload, encoding: .utf8))  // Check "role": "service_role" or "anon"
+   }
+   ```
+
+3. **Query Simplification**
+   - Start with simplest query: `.from("table").select().execute().value`
+   - No `.order()`, `.eq()`, `.limit()`, or other filters
+   - Add conditions incrementally after confirming data fetches
+
+4. **Error Handling (NEVER use `try?`)**
+   ```swift
+   // ❌ BAD: Swallows errors silently
+   let posts = try? await client.from("posts").select().execute().value ?? []
+   
+   // ✅ GOOD: Exposes all errors
+   do {
+       let posts: [Post] = try await client
+           .from("posts")
+           .select()
+           .execute()
+           .value
+       print("✅ Fetched \(posts.count) posts")
+   } catch {
+       print("❌ Supabase error: \(error)")
+       throw error  // Don't swallow
+   }
+   ```
+
+5. **Model Mapping**
+   - Ensure Swift model fields match Supabase schema EXACTLY
+   - Use `CodingKeys` for snake_case to camelCase conversion
+   - Check for optional vs required fields mismatch
+   - Add detailed logging in custom `init(from decoder:)` during dev
+
+6. **Table Names with Numbers**
+   - Tables starting with numbers (e.g., `7verse_posts`) need special handling
+   - Supabase SDK handles this automatically - don't manually quote: `from("7verse_posts")` ✅
+   - NOT `from("\"7verse_posts\"")` ❌
+
+7. **xcconfig URL Parsing**
+   - URLs with `://` may be truncated in xcconfig files
+   - Fallback to hardcoded values in Secrets.swift for reliability
+   - Validate URL before using: check length, presence of protocol, domain
+
+### Supabase SDK Patterns
+
+```swift
+// Correct usage (latest SDK)
+let items: [Item] = try await client
+    .from("items")
+    .select()
+    .order("created_at", ascending: false)
+    .execute()
+    .value  // Directly get decoded value
+
+// NOT .execute().underlyingResponse (older SDK)
+```
+
+### Common Pitfalls
+
+- ❌ Using `try?` - hides decoding errors
+- ❌ Forgetting `await` - compilation error or silent failure
+- ❌ Wrong table name or schema
+- ❌ Model fields don't match database columns
+- ❌ RLS enabled but no policies for service_role
+- ❌ Using `anon` key when `service_role` key is needed

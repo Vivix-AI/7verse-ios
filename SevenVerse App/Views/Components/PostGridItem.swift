@@ -3,27 +3,50 @@ import SwiftUI
 struct PostGridItem: View {
     let post: Post
     
+    // Use thumbnail if available, otherwise fallback to original
+    private var displayImageUrl: String {
+        post.thumbnailUrl ?? post.imageUrl
+    }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Image Area
-            ZStack(alignment: .topTrailing) {
-                AsyncImage(url: URL(string: post.imageUrl)) { phase in
-                    switch phase {
-                    case .empty:
-                        Color.gray.opacity(0.1)
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                    case .failure:
-                        Color.gray.opacity(0.1)
-                    @unknown default:
-                        Color.gray.opacity(0.1)
-                    }
+            // Image Area - Dynamic height based on image aspect ratio
+            AsyncImage(url: URL(string: displayImageUrl)) { phase in
+                switch phase {
+                case .empty:
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.1))
+                        .aspectRatio(3/4, contentMode: .fit)
+                        .overlay(
+                            ProgressView()
+                                .tint(.gray)
+                        )
+                case .success(let image):
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                case .failure:
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.1))
+                        .aspectRatio(3/4, contentMode: .fit)
+                        .overlay(
+                            VStack(spacing: 8) {
+                                Image(systemName: "photo")
+                                    .font(.system(size: 24))
+                                    .foregroundColor(.gray)
+                                Text("Failed to load")
+                                    .font(.caption2)
+                                    .foregroundColor(.gray)
+                            }
+                        )
+                @unknown default:
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.1))
+                        .aspectRatio(3/4, contentMode: .fit)
                 }
-                .frame(height: 220) // Fixed height for now, can be dynamic for true masonry
-                .clipped()
-                
+            }
+            .clipped()
+            .overlay(alignment: .topTrailing) {
                 // Premium Badge
                 if post.isPremium {
                     Image(systemName: "crown.fill")
@@ -38,18 +61,17 @@ struct PostGridItem: View {
             
             // Info Area
             VStack(alignment: .leading, spacing: 8) {
-                // Caption
+                // Caption - Max 3 lines, auto-shrink to 2 or 1
                 Text(post.caption)
-                    .font(.system(size: 14))
-                    .fontWeight(.medium)
-                    .lineLimit(2)
-                    .multilineTextAlignment(.leading)
+                    .font(.system(size: 13))
                     .foregroundColor(.black)
+                    .lineLimit(3)
+                    .multilineTextAlignment(.leading)
                 
-                // User & Likes Row
-                HStack {
-                    // User Avatar
-                    if let avatarUrl = post.profile?.avatarUrl, let url = URL(string: avatarUrl) {
+                // Profile & Views Row
+                HStack(alignment: .center, spacing: 0) {
+                    // Profile Avatar
+                    if let avatarUrl = post.profile?.displayAvatarUrl, let url = URL(string: avatarUrl) {
                         AsyncImage(url: url) { phase in
                             switch phase {
                             case .success(let image):
@@ -71,20 +93,24 @@ struct PostGridItem: View {
                             )
                     }
                     
-                    Text(post.profile?.profileName ?? "User")
+                    // Profile Name
+                    Text(post.profile?.profileName ?? "Unknown")
                         .font(.system(size: 11))
                         .foregroundColor(.gray)
                         .lineLimit(1)
+                        .padding(.leading, 4)
                     
                     Spacer()
                     
-                    // Likes (Placeholder - No likes table yet)
-                    Image(systemName: "heart")
-                        .font(.system(size: 12))
-                        .foregroundColor(.gray)
-                    Text("0")
-                        .font(.system(size: 11))
-                        .foregroundColor(.gray)
+                    // Views
+                    HStack(spacing: 3) {
+                        Image(systemName: "eye")
+                            .font(.system(size: 11))
+                            .foregroundColor(.gray)
+                        Text(post.displayViews)
+                            .font(.system(size: 11))
+                            .foregroundColor(.gray)
+                    }
                 }
             }
             .padding(10)
