@@ -397,7 +397,10 @@ struct PostDetailCarouselView: View {
                                                     if let freshCtaUrl = freshPost.ctaUrl, !freshCtaUrl.isEmpty {
                                                         print("✅ [CTA] Setting webViewURL: \(freshCtaUrl)")
                                                         webViewURL = freshCtaUrl
-                                                        showWebView = true
+                                                        // Delay showing sheet to ensure state is updated
+                                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                                                            showWebView = true
+                                                        }
                                                     } else {
                                                         print("❌ [CTA] No valid CTA URL found in fresh post")
                                                     }
@@ -727,20 +730,44 @@ struct FlowLayout: Layout {
 struct WebViewSheet: View {
     let url: URL
     @Environment(\.dismiss) private var dismiss
+    @State private var showControls = true
     
     var body: some View {
-        NavigationView {
+        ZStack {
+            // Full screen WebView
             WebView(url: url)
-                .navigationTitle("Learn More")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        Button("Close") {
-                            dismiss()
-                        }
+                .ignoresSafeArea()
+                .onTapGesture {
+                    // Toggle controls on tap
+                    withAnimation {
+                        showControls.toggle()
                     }
                 }
+            
+            // Floating close button (top-left)
+            if showControls {
+                VStack {
+                    HStack {
+                        Button(action: {
+                            dismiss()
+                        }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.system(size: 36))
+                                .foregroundColor(.white)
+                                .shadow(color: .black.opacity(0.5), radius: 4, x: 0, y: 2)
+                        }
+                        .padding(.leading, 20)
+                        .padding(.top, 50)
+                        
+                        Spacer()
+                    }
+                    
+                    Spacer()
+                }
+                .transition(.opacity)
+            }
         }
+        .preferredColorScheme(.dark)
     }
 }
 

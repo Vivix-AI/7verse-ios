@@ -76,7 +76,10 @@ struct SinglePostDetailView: View {
                                 if !ctaUrl.isEmpty, URL(string: ctaUrl) != nil {
                                     print("✅ [SinglePost CTA] Setting webViewURL: \(ctaUrl)")
                                     webViewURL = ctaUrl
-                                    showWebView = true
+                                    // Delay showing sheet to ensure state is updated
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                                        showWebView = true
+                                    }
                                 } else {
                                     print("❌ [SinglePost CTA] Invalid CTA URL: \(ctaUrl)")
                                 }
