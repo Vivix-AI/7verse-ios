@@ -634,7 +634,6 @@ struct PostDetailCarouselView: View {
             }
         }
     }
-    }
 }
 
 // MARK: - Post Detail Navigation Bar
