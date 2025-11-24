@@ -22,5 +22,9 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs camera access to allow web interactions that use your camera.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app needs microphone access to allow web interactions that use your microphone.</string>
 </dict>
 </plist>

@@ -747,12 +747,18 @@ struct WebView: UIViewRepresentable {
         // Enable website data store (shares cookies with Safari)
         config.websiteDataStore = .default()
         
+        // Allow inline media playback
+        config.allowsInlineMediaPlayback = true
+        config.mediaTypesRequiringUserActionForPlayback = []
+        
         let webView = WKWebView(frame: .zero, configuration: config)
         webView.navigationDelegate = context.coordinator
+        webView.uiDelegate = context.coordinator // Enable UI delegate for permissions
         
-        // Allow inline media playback
-        webView.configuration.allowsInlineMediaPlayback = true
-        webView.configuration.mediaTypesRequiringUserActionForPlayback = []
+        // Allow media capture
+        if #available(iOS 15.0, *) {
+            webView.configuration.preferences.isElementFullscreenEnabled = true
+        }
         
         return webView
     }
@@ -770,7 +776,24 @@ struct WebView: UIViewRepresentable {
         Coordinator()
     }
     
-    class Coordinator: NSObject, WKNavigationDelegate {
+    class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
+        // MARK: - Helper Methods
+        
+        private func topViewController() -> UIViewController? {
+            guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                  let rootViewController = scene.windows.first(where: { $0.isKeyWindow })?.rootViewController else {
+                return nil
+            }
+            
+            var topController = rootViewController
+            while let presented = topController.presentedViewController {
+                topController = presented
+            }
+            return topController
+        }
+        
+        // MARK: - WKNavigationDelegate
+        
         func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
             print("🌐 [WebView] Started loading: \(webView.url?.absoluteString ?? "unknown")")
         }
@@ -794,6 +817,89 @@ struct WebView: UIViewRepresentable {
         // Handle authentication challenges (for OAuth flows)
         func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
             completionHandler(.performDefaultHandling, nil)
+        }
+        
+        // MARK: - WKUIDelegate (Media Permissions)
+        
+        // Handle camera and microphone permissions
+        @available(iOS 15.0, *)
+        func webView(_ webView: WKWebView, 
+                    requestMediaCapturePermissionFor origin: WKSecurityOrigin,
+                    initiatedByFrame frame: WKFrameInfo,
+                    type: WKMediaCaptureType,
+                    decisionHandler: @escaping (WKPermissionDecision) -> Void) {
+            
+            let mediaType = type == .camera ? "camera" : (type == .microphone ? "microphone" : "camera and microphone")
+            print("📸 [WebView] Media permission requested: \(mediaType) from \(origin.host)")
+            
+            // Grant permission automatically (iOS handles system permissions)
+            decisionHandler(.grant)
+        }
+        
+        // Handle JavaScript alerts, confirms, and prompts
+        func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
+            print("⚠️ [WebView] Alert: \(message)")
+            
+            let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
+                completionHandler()
+            })
+            
+            if let viewController = topViewController() {
+                viewController.present(alert, animated: true)
+            } else {
+                completionHandler()
+            }
+        }
+        
+        func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
+            print("❓ [WebView] Confirm: \(message)")
+            
+            let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { _ in
+                completionHandler(false)
+            })
+            alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
+                completionHandler(true)
+            })
+            
+            if let viewController = topViewController() {
+                viewController.present(alert, animated: true)
+            } else {
+                completionHandler(false)
+            }
+        }
+        
+        func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt prompt: String, defaultText: String?, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (String?) -> Void) {
+            print("📝 [WebView] Prompt: \(prompt)")
+            
+            let alert = UIAlertController(title: nil, message: prompt, preferredStyle: .alert)
+            alert.addTextField { textField in
+                textField.text = defaultText
+            }
+            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { _ in
+                completionHandler(nil)
+            })
+            alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
+                completionHandler(alert.textFields?.first?.text)
+            })
+            
+            if let viewController = topViewController() {
+                viewController.present(alert, animated: true)
+            } else {
+                completionHandler(nil)
+            }
+        }
+        
+        // Handle window.open() requests
+        func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
+            print("🪟 [WebView] New window requested: \(navigationAction.request.url?.absoluteString ?? "unknown")")
+            
+            // Load in current webview instead of opening new window
+            if let url = navigationAction.request.url {
+                webView.load(URLRequest(url: url))
+            }
+            return nil
         }
     }
 }
