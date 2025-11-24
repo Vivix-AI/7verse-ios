@@ -159,29 +159,26 @@ struct SinglePostDetailView: View {
                             print("❌ [SinglePost WebView] Invalid URL format: \(urlString)")
                         }
                     }
-                } else {
-                    // Error state for missing URL
-                    VStack(spacing: 16) {
-                        Image(systemName: "link.slash")
-                            .font(.system(size: 50))
-                            .foregroundColor(.gray)
-                        Text("No URL Available")
-                            .font(.headline)
-                        Text("The interaction link is not available for this post.")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal)
-                        Button("Close") {
-                            showWebView = false
+                    } else {
+                        // Error state for missing URL
+                        VStack(spacing: 16) {
+                            Image(systemName: "xmark.circle")
+                                .font(.system(size: 50))
+                                .foregroundColor(.gray)
+                            Text("No URL Available")
+                                .font(.headline)
+                            Text("The interaction link is not available for this post.")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal)
+                            Button("Close") {
+                                showWebView = false
+                            }
+                            .buttonStyle(.borderedProminent)
                         }
-                        .buttonStyle(.borderedProminent)
+                        .padding()
                     }
-                    .padding()
-                    .onAppear {
-                        print("❌ [SinglePost WebView] No URL provided - webViewURL: \(String(describing: webViewURL))")
-                    }
-                }
             }
         }
         .sheet(isPresented: $showShareSheet) {

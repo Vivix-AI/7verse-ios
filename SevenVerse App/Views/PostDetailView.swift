@@ -288,9 +288,7 @@ struct PostDetailCarouselView: View {
                                                         print("⚠️ [TabView] GET - profileIndex \(profileIndex) out of bounds")
                                                         return 0
                                                     }
-                                                    let currentIndex = currentPostIndices[profileIndex]
-                                                    print("📖 [TabView] GET - Profile \(profileIndex), currentPostIndex: \(currentIndex), postsCount: \(postsForThisProfile.count)")
-                                                    return currentIndex
+                                                    return currentPostIndices[profileIndex]
                                                 },
                                                 set: { newValue in
                                                     guard currentPostIndices.indices.contains(profileIndex),
@@ -531,7 +529,6 @@ struct PostDetailCarouselView: View {
                     if currentPost != nil,
                        let currentProfilePosts = groupedPosts[safe: currentProfileIndex],
                        currentProfilePosts.count > 1 {
-                        let _ = print("🔴 [PageDots] Showing dots - currentProfileIndex: \(currentProfileIndex), postsCount: \(currentProfilePosts.count), currentPostIndex: \(currentPostIndices[currentProfileIndex])")
                         VStack {
                             Spacer()
                             
@@ -544,8 +541,6 @@ struct PostDetailCarouselView: View {
                             }
                             .padding(.bottom, 200) // Test: 200pt from bottom
                         }
-                    } else {
-                        let _ = print("🔴 [PageDots] NOT showing - currentPost: \(currentPost != nil), currentProfileIndex: \(currentProfileIndex), postsCount: \(groupedPosts[safe: currentProfileIndex]?.count ?? 0)")
                     }
                 }
                 .allowsHitTesting(false) // Don't block interactions
@@ -605,7 +600,7 @@ struct PostDetailCarouselView: View {
                     } else {
                         // Error state for missing URL
                         VStack(spacing: 16) {
-                            Image(systemName: "link.slash")
+                            Image(systemName: "xmark.circle")
                                 .font(.system(size: 50))
                                 .foregroundColor(.gray)
                             Text("No URL Available")
@@ -621,9 +616,6 @@ struct PostDetailCarouselView: View {
                             .buttonStyle(.borderedProminent)
                         }
                         .padding()
-                        .onAppear {
-                            print("❌ [WebView Sheet] No URL provided - webViewURL: \(String(describing: webViewURL))")
-                        }
                     }
                 }
             }
