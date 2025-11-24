@@ -5,9 +5,8 @@ import SwiftUI
 struct SinglePostDetailView: View {
     let post: Post
     @Environment(\.dismiss) private var dismiss
-    @State private var showWebView = false
     @State private var showShareSheet = false
-    @State private var webViewURL: String?
+    @State private var webViewURL: IdentifiableURL?
     
     var body: some View {
         GeometryReader { geometry in
@@ -68,20 +67,11 @@ struct SinglePostDetailView: View {
                         // Right: CTA Button
                         if let ctaUrl = post.ctaUrl, !ctaUrl.isEmpty {
                             Button(action: {
-                                print("🔍 [SinglePost CTA] Button tapped")
-                                print("🔍 [SinglePost CTA] Post ID: \(post.id)")
-                                print("🔍 [SinglePost CTA] CTA URL: \(ctaUrl)")
-                                
                                 // Validate URL before setting
-                                if !ctaUrl.isEmpty, URL(string: ctaUrl) != nil {
-                                    print("✅ [SinglePost CTA] Setting webViewURL: \(ctaUrl)")
-                                    webViewURL = ctaUrl
-                                    // Delay showing sheet to ensure state is updated
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                                        showWebView = true
-                                    }
+                                if !ctaUrl.isEmpty, let url = URL(string: ctaUrl) {
+                                    webViewURL = IdentifiableURL(url: url)
                                 } else {
-                                    print("❌ [SinglePost CTA] Invalid CTA URL: \(ctaUrl)")
+                                    print("❌ [SinglePost CTA] Invalid URL")
                                 }
                             }) {
                                 HStack(spacing: 6) {
@@ -131,58 +121,8 @@ struct SinglePostDetailView: View {
             )
         }
         .ignoresSafeArea()
-        .sheet(isPresented: $showWebView) {
-            Group {
-                if let urlString = webViewURL, !urlString.isEmpty {
-                    if let url = URL(string: urlString) {
-                        WebViewSheet(url: url)
-                            .onAppear {
-                                print("🌐 [SinglePost WebView] Opening with URL: \(urlString)")
-                            }
-                    } else {
-                        // Error state for invalid URL
-                        VStack(spacing: 16) {
-                            Image(systemName: "exclamationmark.triangle")
-                                .font(.system(size: 50))
-                                .foregroundColor(.red)
-                            Text("Invalid URL")
-                                .font(.headline)
-                            Text(urlString)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal)
-                            Button("Close") {
-                                showWebView = false
-                            }
-                            .buttonStyle(.borderedProminent)
-                        }
-                        .padding()
-                        .onAppear {
-                            print("❌ [SinglePost WebView] Invalid URL format: \(urlString)")
-                        }
-                    }
-                    } else {
-                        // Error state for missing URL
-                        VStack(spacing: 16) {
-                            Image(systemName: "xmark.circle")
-                                .font(.system(size: 50))
-                                .foregroundColor(.gray)
-                            Text("No URL Available")
-                                .font(.headline)
-                            Text("The interaction link is not available for this post.")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal)
-                            Button("Close") {
-                                showWebView = false
-                            }
-                            .buttonStyle(.borderedProminent)
-                        }
-                        .padding()
-                    }
-            }
+        .sheet(item: $webViewURL) { identifiableURL in
+            WebViewSheet(url: identifiableURL.url)
         }
         .sheet(isPresented: $showShareSheet) {
             ShareSheet(post: post)

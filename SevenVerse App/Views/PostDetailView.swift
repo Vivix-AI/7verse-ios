@@ -10,6 +10,12 @@ struct ViewOffsetKey: PreferenceKey {
     }
 }
 
+// MARK: - IdentifiableURL for sheet presentation
+struct IdentifiableURL: Identifiable {
+    let id = UUID()
+    let url: URL
+}
+
 struct PostDetailView: View {
     let groupedPosts: [[Post]]
     let initialPostId: UUID
@@ -116,8 +122,7 @@ struct PostDetailCarouselView: View {
     @State private var showGreetingsVideo = false
     @State private var greetingsVideoUrl: URL?
     @State private var showShareSheet = false
-    @State private var showWebView = false
-    @State private var webViewURL: String?
+    @State private var webViewURL: IdentifiableURL?
     @State private var scrollOffset: CGFloat = 0
     @State private var isInitialScrollComplete = false
     @State private var loadedProfilesCount = 30 // Start with 30 profiles, will load more as needed
@@ -374,11 +379,6 @@ struct PostDetailCarouselView: View {
                                             if let ctaUrl = currentProfilePost.ctaUrl, !ctaUrl.isEmpty {
                                                 Button(action: {
                                                     // Safely get current post at click time (not from closure)
-                                                    print("🔍 [CTA] Button tapped - profileIndex: \(profileIndex)")
-                                                    print("🔍 [CTA] currentPostIndices[\(profileIndex)]: \(currentPostIndices.indices.contains(profileIndex) ? currentPostIndices[profileIndex] : -1)")
-                                                    print("🔍 [CTA] ctaUrl from view: \(ctaUrl)")
-                                                    
-                                                    // Get fresh post data at click time
                                                     guard currentPostIndices.indices.contains(profileIndex) else {
                                                         print("❌ [CTA] Invalid profileIndex: \(profileIndex)")
                                                         return
@@ -394,15 +394,12 @@ struct PostDetailCarouselView: View {
                                                     
                                                     let freshPost = posts[postIdx]
                                                     
-                                                    if let freshCtaUrl = freshPost.ctaUrl, !freshCtaUrl.isEmpty {
-                                                        print("✅ [CTA] Setting webViewURL: \(freshCtaUrl)")
-                                                        webViewURL = freshCtaUrl
-                                                        // Delay showing sheet to ensure state is updated
-                                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                                                            showWebView = true
-                                                        }
+                                                    if let freshCtaUrl = freshPost.ctaUrl, 
+                                                       !freshCtaUrl.isEmpty,
+                                                       let url = URL(string: freshCtaUrl) {
+                                                        webViewURL = IdentifiableURL(url: url)
                                                     } else {
-                                                        print("❌ [CTA] No valid CTA URL found in fresh post")
+                                                        print("❌ [CTA] No valid CTA URL")
                                                     }
                                                 }) {
                                                     HStack(spacing: 6) {
@@ -569,58 +566,8 @@ struct PostDetailCarouselView: View {
                     ShareSheet(post: post)
                 }
             }
-            .sheet(isPresented: $showWebView) {
-                Group {
-                    if let urlString = webViewURL, !urlString.isEmpty {
-                        if let url = URL(string: urlString) {
-                            WebViewSheet(url: url)
-                                .onAppear {
-                                    print("🌐 [WebView Sheet] Opening with URL: \(urlString)")
-                                }
-                        } else {
-                            // Error state for invalid URL
-                            VStack(spacing: 16) {
-                                Image(systemName: "exclamationmark.triangle")
-                                    .font(.system(size: 50))
-                                    .foregroundColor(.red)
-                                Text("Invalid URL")
-                                    .font(.headline)
-                                Text(urlString)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                    .multilineTextAlignment(.center)
-                                    .padding(.horizontal)
-                                Button("Close") {
-                                    showWebView = false
-                                }
-                                .buttonStyle(.borderedProminent)
-                            }
-                            .padding()
-                            .onAppear {
-                                print("❌ [WebView Sheet] Invalid URL format: \(urlString)")
-                            }
-                        }
-                    } else {
-                        // Error state for missing URL
-                        VStack(spacing: 16) {
-                            Image(systemName: "xmark.circle")
-                                .font(.system(size: 50))
-                                .foregroundColor(.gray)
-                            Text("No URL Available")
-                                .font(.headline)
-                            Text("The interaction link is not available for this post.")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal)
-                            Button("Close") {
-                                showWebView = false
-                            }
-                            .buttonStyle(.borderedProminent)
-                        }
-                        .padding()
-                    }
-                }
+            .sheet(item: $webViewURL) { identifiableURL in
+                WebViewSheet(url: identifiableURL.url)
             }
             .onDisappear {
                 // Clean up timer
