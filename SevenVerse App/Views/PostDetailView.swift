@@ -239,15 +239,23 @@ struct PostDetailCarouselView: View {
     
     var body: some View {
         GeometryReader { geometry in
-            let screenWidth = geometry.size.width
-            let screenHeight = geometry.size.height
-            
-            // Calculate canvas dimensions (full screen for each profile)
-            // Canvas should fill the entire screen height
-            let canvasHeight = screenHeight
-            let canvasWidth = screenWidth
-            
-                        ZStack {
+            mainContent(geometry: geometry)
+        }
+    }
+    
+    // MARK: - View Builders
+    
+    @ViewBuilder
+    private func mainContent(geometry: GeometryProxy) -> some View {
+        let screenWidth = geometry.size.width
+        let screenHeight = geometry.size.height
+        
+        // Calculate canvas dimensions (full screen for each profile)
+        // Canvas should fill the entire screen height
+        let canvasHeight = screenHeight
+        let canvasWidth = screenWidth
+        
+        ZStack {
                 // Canvas Area (ScrollView with posts) - full screen
                 Color.black.ignoresSafeArea()
                 
@@ -564,20 +572,45 @@ struct PostDetailCarouselView: View {
                 }
             }
             .sheet(isPresented: $showWebView) {
-                if let urlString = webViewURL, !urlString.isEmpty {
-                    print("🌐 [WebView Sheet] Opening with URL: \(urlString)")
-                    if let url = URL(string: urlString) {
-                        WebViewSheet(url: url)
+                Group {
+                    if let urlString = webViewURL, !urlString.isEmpty {
+                        if let url = URL(string: urlString) {
+                            WebViewSheet(url: url)
+                                .onAppear {
+                                    print("🌐 [WebView Sheet] Opening with URL: \(urlString)")
+                                }
+                        } else {
+                            // Error state for invalid URL
+                            VStack(spacing: 16) {
+                                Image(systemName: "exclamationmark.triangle")
+                                    .font(.system(size: 50))
+                                    .foregroundColor(.red)
+                                Text("Invalid URL")
+                                    .font(.headline)
+                                Text(urlString)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal)
+                                Button("Close") {
+                                    showWebView = false
+                                }
+                                .buttonStyle(.borderedProminent)
+                            }
+                            .padding()
+                            .onAppear {
+                                print("❌ [WebView Sheet] Invalid URL format: \(urlString)")
+                            }
+                        }
                     } else {
-                        print("❌ [WebView Sheet] Invalid URL format: \(urlString)")
-                        // Error state for invalid URL
+                        // Error state for missing URL
                         VStack(spacing: 16) {
-                            Image(systemName: "exclamationmark.triangle")
+                            Image(systemName: "link.slash")
                                 .font(.system(size: 50))
-                                .foregroundColor(.red)
-                            Text("Invalid URL")
+                                .foregroundColor(.gray)
+                            Text("No URL Available")
                                 .font(.headline)
-                            Text(urlString)
+                            Text("The interaction link is not available for this post.")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                                 .multilineTextAlignment(.center)
@@ -588,27 +621,10 @@ struct PostDetailCarouselView: View {
                             .buttonStyle(.borderedProminent)
                         }
                         .padding()
-                    }
-                } else {
-                    print("❌ [WebView Sheet] No URL provided - webViewURL: \(String(describing: webViewURL))")
-                    // Error state for missing URL
-                    VStack(spacing: 16) {
-                        Image(systemName: "link.slash")
-                            .font(.system(size: 50))
-                            .foregroundColor(.gray)
-                        Text("No URL Available")
-                            .font(.headline)
-                        Text("The interaction link is not available for this post.")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal)
-                        Button("Close") {
-                            showWebView = false
+                        .onAppear {
+                            print("❌ [WebView Sheet] No URL provided - webViewURL: \(String(describing: webViewURL))")
                         }
-                        .buttonStyle(.borderedProminent)
                     }
-                    .padding()
                 }
             }
             .onDisappear {
@@ -617,6 +633,7 @@ struct PostDetailCarouselView: View {
                 scrollTimer = nil
             }
         }
+    }
     }
 }
 
