@@ -330,6 +330,13 @@ struct PostDetailCarouselView: View {
                                                 }
                                             }
                                         
+                                        // Dimming overlay for non-focused profiles
+                                        if profileIndex != currentProfileIndex {
+                                            Color.black.opacity(0.3)
+                                                .ignoresSafeArea()
+                                                .allowsHitTesting(false)
+                                        }
+                                        
                                         // Bottom TabBar for THIS profile
                                         // Show TabBar for all profiles (not just current)
                                         if !postsForThisProfile.isEmpty {
