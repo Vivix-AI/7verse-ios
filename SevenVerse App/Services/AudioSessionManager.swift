@@ -48,8 +48,8 @@ class AudioSessionManager {
                 var frontOrBottomSource: AVAudioSessionDataSourceDescription? = nil
                 
                 for source in dataSources {
-                    let isFront: Bool = (source.orientation == .front)
-                    let isBottom: Bool = (source.location == .bottom)
+                    let isFront: Bool = (source.orientation == AVAudioSession.Orientation.front)
+                    let isBottom: Bool = (source.location == AVAudioSession.Location.bottom)
                     if isFront || isBottom {
                         frontOrBottomSource = source
                         break
