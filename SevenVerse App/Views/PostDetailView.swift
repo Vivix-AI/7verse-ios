@@ -289,13 +289,13 @@ struct PostDetailCarouselView: View {
                                         let minY = itemGeo.frame(in: .global).minY
                                         let screenHeight = geometry.size.height
                                         
-                                        // Calculate if this profile is above or below the current visible area
-                                        // minY < 0: profile is above (scrolled up past it)
-                                        // minY > screenHeight: profile is below (not scrolled to it yet)
-                                        // 0 <= minY <= screenHeight: profile is visible or partially visible
-                                        let isAboveScreen = minY < -screenHeight * 0.3
-                                        let isBelowScreen = minY > screenHeight * 0.3
-                                        let shouldDim = isAboveScreen || isBelowScreen
+                                        // Calculate dimming opacity based on distance from center
+                                        // Center of screen (minY = 0): opacity = 0 (no dimming)
+                                        // Moving away from center: opacity increases gradually
+                                        // Max opacity = 0.4 when fully off-screen
+                                        let distanceFromCenter = abs(minY)
+                                        let maxDimmingDistance = screenHeight * 0.5
+                                        let dimOpacity = min(distanceFromCenter / maxDimmingDistance, 1.0) * 0.4
                                         
                                         ZStack(alignment: .bottom) {
                                             // Horizontal TabView for posts within THIS profile only
@@ -342,12 +342,11 @@ struct PostDetailCarouselView: View {
                                                     }
                                                 }
                                             
-                                            // Dimming overlay based on scroll position
-                                            if shouldDim {
-                                                Color.black.opacity(0.3)
+                                            // Gradient dimming overlay based on scroll position
+                                            if dimOpacity > 0.01 {
+                                                Color.black.opacity(dimOpacity)
                                                     .ignoresSafeArea()
                                                     .allowsHitTesting(false)
-                                                    .animation(.easeInOut(duration: 0.2), value: shouldDim)
                                             }
                                             
                                             // Bottom TabBar for THIS profile
@@ -549,7 +548,7 @@ struct PostDetailCarouselView: View {
                 Group {
                     if currentPost != nil,
                        let currentProfilePosts = groupedPosts[safe: currentProfileIndex],
-                       currentProfilePosts.count > 1 {
+                       !currentProfilePosts.isEmpty {
                         VStack {
                             Spacer()
                             
