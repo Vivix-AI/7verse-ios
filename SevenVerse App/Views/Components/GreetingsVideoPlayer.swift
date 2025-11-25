@@ -1,13 +1,13 @@
-import SwiftUI
 import AVKit
+import SwiftUI
 
 struct GreetingsVideoPlayer: View {
     let videoURL: URL
     let onDismiss: () -> Void
-    
+
     @State private var player: AVPlayer?
     @State private var isPlaying = false
-    
+
     var body: some View {
         ZStack {
             // Semi-transparent background
@@ -17,7 +17,7 @@ struct GreetingsVideoPlayer: View {
                     // Tap to skip
                     onDismiss()
                 }
-            
+
             VStack(spacing: 20) {
                 // Video Player
                 if let player = player {
@@ -32,7 +32,7 @@ struct GreetingsVideoPlayer: View {
                         .scaleEffect(1.5)
                         .frame(width: 300, height: 400)
                 }
-                
+
                 // Skip button
                 Button(action: {
                     onDismiss()
@@ -58,12 +58,12 @@ struct GreetingsVideoPlayer: View {
             cleanupPlayer()
         }
     }
-    
+
     private func setupPlayer() {
         let playerItem = AVPlayerItem(url: videoURL)
         player = AVPlayer(playerItem: playerItem)
         player?.volume = 0.8
-        
+
         // Observe when video finishes
         NotificationCenter.default.addObserver(
             forName: .AVPlayerItemDidPlayToEndTime,
@@ -73,18 +73,17 @@ struct GreetingsVideoPlayer: View {
             // Auto dismiss when video ends
             onDismiss()
         }
-        
+
         // Start playing
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             player?.play()
             isPlaying = true
         }
     }
-    
+
     private func cleanupPlayer() {
         player?.pause()
         player = nil
         NotificationCenter.default.removeObserver(self)
     }
 }
-

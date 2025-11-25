@@ -3,16 +3,16 @@ import SwiftUI
 struct MainTabView: View {
     @StateObject private var feedViewModel = FeedViewModel()
     @State private var selectedTab: Tab = .home
-    
+
     enum Tab {
         case home, create, profile
     }
-    
+
     init() {
         // Clear standard tab bar appearance just in case we revert or mix
         UITabBar.appearance().isHidden = true
     }
-    
+
     var body: some View {
         ZStack(alignment: .bottom) {
             // Content Layer
@@ -31,27 +31,27 @@ struct MainTabView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            
+
             // Custom Tab Bar Layer
             VStack(spacing: 0) {
                 Divider()
                     .background(Color.gray.opacity(0.2))
-                
+
                 HStack(spacing: 0) {
                     // Home Icon
                     TabBarButton(icon: "play.circle", isSelected: selectedTab == .home) {
                         selectedTab = .home
                     }
-                    
+
                     Spacer()
-                    
+
                     // Create Icon
                     TabBarButton(icon: "plus.app", isSelected: selectedTab == .create) {
                         selectedTab = .create
                     }
-                    
+
                     Spacer()
-                    
+
                     // Profile Icon
                     TabBarButton(icon: "person", isSelected: selectedTab == .profile) {
                         selectedTab = .profile
@@ -72,7 +72,7 @@ struct TabBarButton: View {
     let icon: String
     let isSelected: Bool
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
             Image(systemName: icon)

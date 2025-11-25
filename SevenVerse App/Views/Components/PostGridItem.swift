@@ -2,12 +2,12 @@ import SwiftUI
 
 struct PostGridItem: View {
     let post: Post
-    
+
     // Use thumbnail if available, otherwise fallback to original
     private var displayImageUrl: String {
         post.thumbnailUrl ?? post.imageUrl
     }
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // Image Area - Dynamic height based on image aspect ratio
@@ -16,19 +16,19 @@ struct PostGridItem: View {
                 case .empty:
                     Rectangle()
                         .fill(Color.gray.opacity(0.1))
-                        .aspectRatio(3/4, contentMode: .fit)
+                        .aspectRatio(3 / 4, contentMode: .fit)
                         .overlay(
                             ProgressView()
                                 .tint(.gray)
                         )
-                case .success(let image):
+                case let .success(image):
                     image
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                 case .failure:
                     Rectangle()
                         .fill(Color.gray.opacity(0.1))
-                        .aspectRatio(3/4, contentMode: .fit)
+                        .aspectRatio(3 / 4, contentMode: .fit)
                         .overlay(
                             VStack(spacing: 8) {
                                 Image(systemName: "photo")
@@ -42,7 +42,7 @@ struct PostGridItem: View {
                 @unknown default:
                     Rectangle()
                         .fill(Color.gray.opacity(0.1))
-                        .aspectRatio(3/4, contentMode: .fit)
+                        .aspectRatio(3 / 4, contentMode: .fit)
                 }
             }
             .clipped()
@@ -58,7 +58,7 @@ struct PostGridItem: View {
                         .padding(8)
                 }
             }
-            
+
             // Info Area
             VStack(alignment: .leading, spacing: 8) {
                 // Caption - Max 3 lines, auto-shrink to 2 or 1
@@ -67,14 +67,14 @@ struct PostGridItem: View {
                     .foregroundColor(.black)
                     .lineLimit(3)
                     .multilineTextAlignment(.leading)
-                
+
                 // Profile & Views Row
                 HStack(alignment: .center, spacing: 0) {
                     // Profile Avatar
                     if let avatarUrl = post.profile?.displayAvatarUrl, let url = URL(string: avatarUrl) {
                         AsyncImage(url: url) { phase in
                             switch phase {
-                            case .success(let image):
+                            case let .success(image):
                                 image.resizable().aspectRatio(contentMode: .fill)
                             default:
                                 Color.gray.opacity(0.3)
@@ -92,16 +92,16 @@ struct PostGridItem: View {
                                     .foregroundColor(.gray)
                             )
                     }
-                    
+
                     // Profile Name
                     Text(post.profile?.profileName ?? "Unknown")
                         .font(.system(size: 11))
                         .foregroundColor(.gray)
                         .lineLimit(1)
                         .padding(.leading, 4)
-                    
+
                     Spacer()
-                    
+
                     // Views
                     HStack(spacing: 3) {
                         Image(systemName: "eye")

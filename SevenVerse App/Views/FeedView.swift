@@ -8,12 +8,12 @@ struct IdentifiableUUID: Identifiable {
 struct FeedView: View {
     @ObservedObject var viewModel: FeedViewModel
     @State private var selectedPostId: IdentifiableUUID? // For fullScreenCover item binding
-    
+
     var body: some View {
         NavigationView {
             ZStack(alignment: .top) {
                 Color(uiColor: .systemGray6).ignoresSafeArea()
-                
+
                 VStack(spacing: 0) {
                     // Universal App Navigation Bar
                     AppNavigationBar(
@@ -27,13 +27,13 @@ struct FeedView: View {
                             print("Notifications tapped")
                         }
                     )
-                    
+
                     // Content
                     if viewModel.isLoading && viewModel.posts.isEmpty {
                         // Skeleton Loading State
                         ScrollView {
                             WaterfallLayout(columns: 2, spacing: 8) {
-                                ForEach(0..<6, id: \.self) { _ in
+                                ForEach(0 ..< 6, id: \.self) { _ in
                                     SkeletonPostCard()
                                 }
                             }
@@ -47,13 +47,13 @@ struct FeedView: View {
                                     Button(action: {
                                         print("🟢 [FeedView] Tapped post ID: \(post.id)")
                                         print("🟢 [FeedView] groupedPosts.count: \(viewModel.groupedPosts.count)")
-                                        
+
                                         // Check if groupedPosts is ready
                                         guard !viewModel.groupedPosts.isEmpty else {
                                             print("❌ [FeedView] groupedPosts is empty! Cannot open detail.")
                                             return
                                         }
-                                        
+
                                         // Set selectedPostId to trigger fullScreenCover
                                         selectedPostId = IdentifiableUUID(id: post.id)
                                     }) {
@@ -63,7 +63,7 @@ struct FeedView: View {
                                 }
                             }
                             .padding(8)
-                            
+
                             // Bottom padding for TabBar (reduced)
                             Color.clear.frame(height: 60)
                         }

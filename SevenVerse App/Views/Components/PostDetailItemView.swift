@@ -5,14 +5,14 @@ import SwiftUI
 struct PostDetailItemView: View {
     let post: Post
     @Binding var isScrolling: Bool
-    
+
     @State private var isLiked = false
     @State private var localLikesCount: Int = 0
     @State private var showWebView = false
     @State private var showProfileDetail = false
-    
+
     private var likedPostsKey: String { "likedPosts" }
-    
+
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -20,7 +20,7 @@ struct PostDetailItemView: View {
                 ZStack {
                     AsyncImage(url: URL(string: post.thumbnailUrl ?? post.imageUrl)) { phase in
                         switch phase {
-                        case .success(let image):
+                        case let .success(image):
                             image
                                 .resizable()
                                 .aspectRatio(contentMode: .fill)
@@ -35,17 +35,17 @@ struct PostDetailItemView: View {
                             Color.black
                         }
                     }
-                    
+
                     // Dark overlay to make background darker
                     Color.black.opacity(0.5)
                 }
                 .clipped()
                 .ignoresSafeArea()
-                
+
                 // Foreground Image
                 AsyncImage(url: URL(string: post.imageUrl)) { phase in
                     switch phase {
-                    case .success(let image):
+                    case let .success(image):
                         image
                             .resizable()
                             .aspectRatio(contentMode: .fit)
@@ -73,11 +73,11 @@ struct PostDetailItemView: View {
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                
+
                 // Content Overlay (固定从下至上布局)
                 VStack(alignment: .leading, spacing: 0) {
                     Spacer()
-                    
+
                     // Content Area
                     VStack(alignment: .leading, spacing: 12) {
                         // Premium Badge
@@ -94,7 +94,7 @@ struct PostDetailItemView: View {
                             .background(Color.yellow)
                             .clipShape(Capsule())
                         }
-                        
+
                         // Profile Info (Tappable)
                         if let profile = post.profile {
                             Button(action: {
@@ -103,7 +103,7 @@ struct PostDetailItemView: View {
                                 HStack(spacing: 10) {
                                     AsyncImage(url: URL(string: profile.displayAvatarUrl ?? "")) { phase in
                                         switch phase {
-                                        case .success(let image):
+                                        case let .success(image):
                                             image
                                                 .resizable()
                                                 .aspectRatio(contentMode: .fill)
@@ -119,7 +119,7 @@ struct PostDetailItemView: View {
                                     }
                                     .frame(width: 36, height: 36)
                                     .clipShape(Circle())
-                                    
+
                                     Text(profile.profileName)
                                         .font(.system(size: 15, weight: .semibold))
                                         .foregroundColor(.white)
@@ -129,14 +129,14 @@ struct PostDetailItemView: View {
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             }
                         }
-                        
+
                         // Caption
                         Text(post.caption)
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundColor(.white)
                             .lineSpacing(4)
                             .fixedSize(horizontal: false, vertical: true)
-                        
+
                         // Hashtags
                         if !post.hashtags.isEmpty {
                             Text(post.hashtags.map { "#\($0)" }.joined(separator: " "))
@@ -168,17 +168,17 @@ struct PostDetailItemView: View {
             loadInitialStates()
         }
     }
-    
+
     private func loadInitialStates() {
         let likedPosts = UserDefaults.standard.stringArray(forKey: likedPostsKey) ?? []
         isLiked = likedPosts.contains(post.id.uuidString)
         localLikesCount = post.likesCount
         if isLiked { localLikesCount += 1 }
     }
-    
+
     private func toggleLike() {
         var likedPosts = UserDefaults.standard.stringArray(forKey: likedPostsKey) ?? []
-        
+
         if isLiked {
             likedPosts.removeAll(where: { $0 == post.id.uuidString })
             localLikesCount -= 1
@@ -188,19 +188,17 @@ struct PostDetailItemView: View {
         }
         UserDefaults.standard.set(likedPosts, forKey: likedPostsKey)
         isLiked.toggle()
-        
+
         print("Post \(post.id) like status: \(isLiked), count: \(localLikesCount)")
     }
-    
-    
+
     private func formatCount(_ count: Int) -> String {
         if count >= 1_000_000 {
             return String(format: "%.1fM", Double(count) / 1_000_000.0)
-        } else if count >= 1_000 {
-            return String(format: "%.1fK", Double(count) / 1_000.0)
+        } else if count >= 1000 {
+            return String(format: "%.1fK", Double(count) / 1000.0)
         } else {
             return "\(count)"
         }
     }
 }
-

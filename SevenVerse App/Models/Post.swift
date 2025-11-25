@@ -14,17 +14,17 @@ struct Post: Identifiable, Codable, Hashable {
     let likesCount: Int
     let greetingsVideo: GreetingsVideo?
     let profile: Profile?
-    
+
     struct GreetingsVideo: Codable, Hashable {
         let videos: [VideoItem]
-        
+
         struct VideoItem: Codable, Hashable {
             let url: String
             let duration: Double?
             let thumbnail: String?
         }
     }
-    
+
     enum CodingKeys: String, CodingKey {
         case id
         case profileId = "profile_id"
@@ -40,11 +40,11 @@ struct Post: Identifiable, Codable, Hashable {
         case greetingsVideo = "greetings_video"
         case profile = "7verse_profiles"
     }
-    
+
     // Dev-mode aggressive decoding: crash loudly if data is malformed
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        
+
         id = try container.decode(UUID.self, forKey: .id)
         profileId = try container.decode(UUID.self, forKey: .profileId)
         caption = try container.decode(String.self, forKey: .caption)
@@ -56,10 +56,10 @@ struct Post: Identifiable, Codable, Hashable {
         likesCount = (try? container.decode(Int.self, forKey: .likesCount)) ?? 0
         greetingsVideo = try? container.decodeIfPresent(GreetingsVideo.self, forKey: .greetingsVideo)
         profile = try container.decodeIfPresent(Profile.self, forKey: .profile)
-        
+
         // Date Decoding - FAIL FAST if format is wrong
         let dateString = try container.decode(String.self, forKey: .createdAt)
-        
+
         if let date = ISO8601DateFormatter().date(from: dateString) {
             createdAt = date
         } else {
@@ -74,19 +74,20 @@ struct Post: Identifiable, Codable, Hashable {
                 fatalError("Invalid date format for Post.createdAt: '\(dateString)'")
             }
         }
-        
+
         // Hashtags Decoding - FAIL FAST if format is wrong
         if let tags = try? container.decode([String].self, forKey: .hashtags) {
             hashtags = tags
         } else if let tagsString = try? container.decode(String.self, forKey: .hashtags) {
             if let data = tagsString.data(using: .utf8),
-               let decodedTags = try? JSONDecoder().decode([String].self, from: data) {
+               let decodedTags = try? JSONDecoder().decode([String].self, from: data)
+            {
                 hashtags = decodedTags
             } else {
                 // Postgres array format {tag1,tag2}
                 let cleaned = tagsString.replacingOccurrences(of: "{", with: "")
-                                        .replacingOccurrences(of: "}", with: "")
-                                        .replacingOccurrences(of: "\"", with: "")
+                    .replacingOccurrences(of: "}", with: "")
+                    .replacingOccurrences(of: "\"", with: "")
                 hashtags = cleaned.components(separatedBy: ",").filter { !$0.isEmpty }
             }
         } else {
@@ -94,7 +95,7 @@ struct Post: Identifiable, Codable, Hashable {
             fatalError("Invalid hashtags format for Post")
         }
     }
-    
+
     // Standard Init
     init(id: UUID, profileId: UUID, createdAt: Date, caption: String, hashtags: [String], imageUrl: String, thumbnailUrl: String?, ctaUrl: String?, isPremium: Bool, views: Int, likesCount: Int, greetingsVideo: GreetingsVideo?, profile: Profile?) {
         self.id = id
@@ -111,38 +112,37 @@ struct Post: Identifiable, Codable, Hashable {
         self.greetingsVideo = greetingsVideo
         self.profile = profile
     }
-    
+
     // MARK: - View Helpers
-    
+
     var displayDate: String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         return formatter.string(from: createdAt)
     }
-    
+
     var displayViews: String {
         if views >= 1_000_000 {
             return String(format: "%.1fM", Double(views) / 1_000_000.0)
-        } else if views >= 1_000 {
-            return String(format: "%.1fK", Double(views) / 1_000.0)
+        } else if views >= 1000 {
+            return String(format: "%.1fK", Double(views) / 1000.0)
         } else {
             return "\(views)"
         }
     }
-    
+
     var displayLikes: String {
         if likesCount >= 1_000_000 {
             return String(format: "%.1fM", Double(likesCount) / 1_000_000.0)
-        } else if likesCount >= 1_000 {
-            return String(format: "%.1fK", Double(likesCount) / 1_000.0)
+        } else if likesCount >= 1000 {
+            return String(format: "%.1fK", Double(likesCount) / 1000.0)
         } else {
             return "\(likesCount)"
         }
     }
-    
-    
+
     // MARK: - Copy Helper
-    
+
     func copyWithNewId() -> Post {
         return Post(
             id: UUID(),
@@ -160,7 +160,7 @@ struct Post: Identifiable, Codable, Hashable {
             profile: self.profile
         )
     }
-    
+
     // Get a random greeting video (shuffle strategy)
     func randomGreetingVideo() -> GreetingsVideo.VideoItem? {
         guard let videos = greetingsVideo?.videos, !videos.isEmpty else { return nil }

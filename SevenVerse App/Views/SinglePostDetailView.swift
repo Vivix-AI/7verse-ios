@@ -7,27 +7,27 @@ struct SinglePostDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showShareSheet = false
     @State private var webViewURL: IdentifiableURL?
-    
+
     var body: some View {
         GeometryReader { geometry in
             let screenHeight = geometry.size.height
             let screenWidth = geometry.size.width
-            
+
             ZStack {
                 // Background - always black to prevent white flash
                 Color.black.ignoresSafeArea()
-                
+
                 // Post Content (single post, full screen)
                 PostDetailItemView(
                     post: post,
                     isScrolling: .constant(false)
                 )
                 .frame(width: screenWidth, height: screenHeight)
-                
+
                 // Bottom TabBar (same as PostDetailView)
                 VStack {
                     Spacer()
-                    
+
                     HStack(alignment: .center, spacing: 16) {
                         // Left: Like & Remix
                         HStack(spacing: 12) {
@@ -39,7 +39,7 @@ struct SinglePostDetailView: View {
                                     Image(systemName: "heart")
                                         .font(.system(size: 20, weight: .regular))
                                         .foregroundColor(.white)
-                                    
+
                                     Text("\(post.likesCount)")
                                         .font(.system(size: 13, weight: .semibold))
                                         .foregroundColor(.white)
@@ -48,7 +48,7 @@ struct SinglePostDetailView: View {
                                 .frame(width: 44, height: 44)
                                 .contentShape(Rectangle())
                             }
-                            
+
                             // Remix
                             Button(action: {
                                 // TODO: Implement remix functionality
@@ -61,9 +61,9 @@ struct SinglePostDetailView: View {
                             }
                         }
                         .padding(.leading, 24)
-                        
+
                         Spacer()
-                        
+
                         // Right: CTA Button
                         if let ctaUrl = post.ctaUrl, !ctaUrl.isEmpty {
                             Button(action: {
@@ -102,7 +102,7 @@ struct SinglePostDetailView: View {
                 VStack(spacing: 0) {
                     Color.clear
                         .frame(height: 62)
-                    
+
                     AppNavigationBar(
                         leftContent: .back(action: {
                             dismiss()
@@ -114,10 +114,10 @@ struct SinglePostDetailView: View {
                             showShareSheet = true
                         }
                     )
-                    
+
                     Spacer()
-                }
-                , alignment: .top
+                },
+                alignment: .top
             )
         }
         .ignoresSafeArea()
@@ -129,4 +129,3 @@ struct SinglePostDetailView: View {
         }
     }
 }
-

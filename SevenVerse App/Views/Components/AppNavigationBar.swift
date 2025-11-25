@@ -12,13 +12,13 @@ struct AppNavigationBar: View {
     let onSearchTap: (() -> Void)?
     let onNotificationTap: (() -> Void)?
     let onShareTap: (() -> Void)?
-    
+
     enum LeftContent {
         case logo
         case icon
         case back(action: (() -> Void)?)
     }
-    
+
     init(
         leftContent: LeftContent = .logo,
         showSearch: Bool = false,
@@ -40,7 +40,7 @@ struct AppNavigationBar: View {
         self.onNotificationTap = onNotificationTap
         self.onShareTap = onShareTap
     }
-    
+
     var body: some View {
         HStack(spacing: 0) {
             // Left Content
@@ -51,15 +51,15 @@ struct AppNavigationBar: View {
                     .scaledToFit()
                     .frame(height: 32)
                     .padding(.leading, 6)
-                
+
             case .icon:
                 Image("Icon")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 28, height: 28)
                     .padding(.leading, 6)
-                
-            case .back(let action):
+
+            case let .back(action):
                 Button(action: {
                     if let action = action {
                         action()
@@ -73,9 +73,9 @@ struct AppNavigationBar: View {
                 }
                 .padding(.leading, 4)
             }
-            
+
             Spacer()
-            
+
             // Right Actions
             HStack(spacing: 4) {
                 if showShare {
@@ -89,7 +89,7 @@ struct AppNavigationBar: View {
                             .contentShape(Rectangle())
                     }
                 }
-                
+
                 if showNotifications {
                     Button(action: {
                         onNotificationTap?()
@@ -101,7 +101,7 @@ struct AppNavigationBar: View {
                             .contentShape(Rectangle())
                     }
                 }
-                
+
                 if showSearch {
                     Button(action: {
                         onSearchTap?()

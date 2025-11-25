@@ -4,13 +4,13 @@ import SwiftUI
 struct SevenVerseApp: App {
     // Create the AuthViewModel at the root level
     @StateObject private var authViewModel = AuthViewModel()
-    
+
     init() {
         // Configure cache on app launch
         CacheService.shared.configureImageCache()
         print("✅ [App] Cache configured")
     }
-    
+
     var body: some Scene {
         WindowGroup {
             ContentView()
