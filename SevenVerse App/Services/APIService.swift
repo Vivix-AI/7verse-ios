@@ -36,7 +36,10 @@ class APIService {
                 .value
             return posts
         } catch {
-            print("❌ [APIService] Failed to fetch posts: \(error)")
+            // Don't log cancelled requests (happens during normal navigation)
+            if let nsError = error as NSError?, nsError.code != NSURLErrorCancelled {
+                print("❌ [APIService] Failed to fetch posts: \(error)")
+            }
             throw error
         }
     }
@@ -64,7 +67,10 @@ class APIService {
                 .value
             return posts
         } catch {
-            print("❌ [APIService] Failed to fetch posts for profile: \(error)")
+            // Don't log cancelled requests (happens during normal navigation)
+            if let nsError = error as NSError?, nsError.code != NSURLErrorCancelled {
+                print("❌ [APIService] Failed to fetch posts for profile: \(error)")
+            }
             throw error
         }
     }
@@ -77,11 +83,8 @@ class APIService {
                 "increment_post_views",
                 params: ["post_id": postId.uuidString]
             ).execute()
-            
-            print("✅ [APIService] Incremented views for post: \(postId)")
         } catch {
-            print("❌ [APIService] Failed to increment views: \(error)")
-            // Don't throw - views increment is not critical
+            // Don't log - views increment is not critical
         }
     }
     
@@ -107,7 +110,10 @@ class APIService {
                 return posts
             }
         } catch {
-            print("❌ [APIService] Failed to fetch posts: \(error)")
+            // Don't log cancelled requests
+            if let nsError = error as NSError?, nsError.code != NSURLErrorCancelled {
+                print("❌ [APIService] Failed to fetch posts: \(error)")
+            }
             throw error
         }
     }
@@ -125,7 +131,13 @@ class APIService {
             
             return profile
         } catch {
-            print("❌ [APIService] Failed to fetch profile: \(error)")
+            // Don't log cancelled requests
+            if let nsError = error as NSError?, nsError.code != NSURLErrorCancelled {
+                print("❌ [APIService] Failed to fetch profile: \(error)")
+            }
+            throw error
+        }
+    }
             throw error
         }
     }
