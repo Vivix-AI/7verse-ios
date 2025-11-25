@@ -349,6 +349,23 @@ struct PostDetailCarouselView: View {
                                                     .allowsHitTesting(false)
                                             }
                                             
+                                            // Page indicator dots (豆子) for this profile
+                                            if !postsForThisProfile.isEmpty {
+                                                VStack {
+                                                    Spacer()
+                                                    
+                                                    HStack(spacing: 6) {
+                                                        ForEach(0..<postsForThisProfile.count, id: \.self) { index in
+                                                            Circle()
+                                                                .fill(index == currentPostIndices[profileIndex] ? Color.white : Color.white.opacity(0.4))
+                                                                .frame(width: 6, height: 6)
+                                                        }
+                                                    }
+                                                    .padding(.bottom, 100) // Above TabBar (80pt) + spacing
+                                                }
+                                                .allowsHitTesting(false)
+                                            }
+                                            
                                             // Bottom TabBar for THIS profile
                                         // Show TabBar for all profiles (not just current)
                                         if !postsForThisProfile.isEmpty {
@@ -542,29 +559,6 @@ struct PostDetailCarouselView: View {
                     Spacer()
                 }
                 , alignment: .top
-            )
-            .overlay(
-                // Page Indicator (豆豆) - Global overlay, above TabBar
-                Group {
-                    if currentPost != nil,
-                       let currentProfilePosts = groupedPosts[safe: currentProfileIndex],
-                       !currentProfilePosts.isEmpty {
-                        VStack {
-                            Spacer()
-                            
-                            HStack(spacing: 6) {
-                                ForEach(0..<currentProfilePosts.count, id: \.self) { index in
-                                    Circle()
-                                        .fill(index == currentPostIndices[currentProfileIndex] ? Color.white : Color.white.opacity(0.4))
-                                        .frame(width: 6, height: 6)
-                                }
-                            }
-                            .padding(.bottom, 200) // Test: 200pt from bottom
-                        }
-                    }
-                }
-                .allowsHitTesting(false) // Don't block interactions
-                , alignment: .center
             )
             .overlay(
                 // Greetings Video Overlay (Full Screen, on top of everything)
