@@ -285,59 +285,72 @@ struct PostDetailCarouselView: View {
                                     let postsForThisProfile = groupedPosts[profileIndex]
                                     
                                     // Each profile: TabView + TabBar
-                                    ZStack(alignment: .bottom) {
-                                        // Horizontal TabView for posts within THIS profile only
-                                        TabView(selection: Binding<Int>(
-                                                get: { 
-                                                    guard currentPostIndices.indices.contains(profileIndex) else {
-                                                        print("⚠️ [TabView] GET - profileIndex \(profileIndex) out of bounds")
-                                                        return 0
-                                                    }
-                                                    return currentPostIndices[profileIndex]
-                                                },
-                                                set: { newValue in
-                                                    guard currentPostIndices.indices.contains(profileIndex),
-                                                          newValue < postsForThisProfile.count else {
-                                                        print("⚠️ [TabView] SET failed - profileIndex: \(profileIndex), newValue: \(newValue)")
-                                                        return
-                                                    }
-                                                    print("✏️ [TabView] SET - Profile \(profileIndex), \(currentPostIndices[profileIndex]) → \(newValue)")
-                                                    currentPostIndices[profileIndex] = newValue
-                                                }
-                                            )) {
-                                                // Only loop through THIS profile's posts (not global)
-                                                ForEach(Array(postsForThisProfile.indices), id: \.self) { postIndex in
-                                                    PostDetailItemView(
-                                                        post: postsForThisProfile[postIndex],
-                                                        isScrolling: $isScrolling
-                                                    )
-                                                    .tag(postIndex)
-                                                    .onAppear {
-                                                        // Preload adjacent posts
-                                                        preloadAdjacentPosts(profileIndex: profileIndex, postIndex: postIndex)
-                                                    }
-                                                }
-                                            }
-                                            .tabViewStyle(.page(indexDisplayMode: .never))
-                                            .onAppear {
-                                                // Ensure the correct post is selected when this TabView appears
-                                                // Only for the first profile (virtualIndex == 0)
-                                                if virtualIndex == 0 && currentPostIndices[profileIndex] != initialPostIndex {
-                                                    print("🔧 [TabView] Fixing initial selection for profile \(profileIndex): \(currentPostIndices[profileIndex]) → \(initialPostIndex)")
-                                                    DispatchQueue.main.async {
-                                                        currentPostIndices[profileIndex] = initialPostIndex
-                                                    }
-                                                }
-                                            }
+                                    GeometryReader { itemGeo in
+                                        let minY = itemGeo.frame(in: .global).minY
+                                        let screenHeight = geometry.size.height
                                         
-                                        // Dimming overlay for non-focused profiles
-                                        if profileIndex != currentProfileIndex {
-                                            Color.black.opacity(0.3)
-                                                .ignoresSafeArea()
-                                                .allowsHitTesting(false)
-                                        }
+                                        // Calculate if this profile is above or below the current visible area
+                                        // minY < 0: profile is above (scrolled up past it)
+                                        // minY > screenHeight: profile is below (not scrolled to it yet)
+                                        // 0 <= minY <= screenHeight: profile is visible or partially visible
+                                        let isAboveScreen = minY < -screenHeight * 0.3
+                                        let isBelowScreen = minY > screenHeight * 0.3
+                                        let shouldDim = isAboveScreen || isBelowScreen
                                         
-                                        // Bottom TabBar for THIS profile
+                                        ZStack(alignment: .bottom) {
+                                            // Horizontal TabView for posts within THIS profile only
+                                            TabView(selection: Binding<Int>(
+                                                    get: { 
+                                                        guard currentPostIndices.indices.contains(profileIndex) else {
+                                                            print("⚠️ [TabView] GET - profileIndex \(profileIndex) out of bounds")
+                                                            return 0
+                                                        }
+                                                        return currentPostIndices[profileIndex]
+                                                    },
+                                                    set: { newValue in
+                                                        guard currentPostIndices.indices.contains(profileIndex),
+                                                              newValue < postsForThisProfile.count else {
+                                                            print("⚠️ [TabView] SET failed - profileIndex: \(profileIndex), newValue: \(newValue)")
+                                                            return
+                                                        }
+                                                        print("✏️ [TabView] SET - Profile \(profileIndex), \(currentPostIndices[profileIndex]) → \(newValue)")
+                                                        currentPostIndices[profileIndex] = newValue
+                                                    }
+                                                )) {
+                                                    // Only loop through THIS profile's posts (not global)
+                                                    ForEach(Array(postsForThisProfile.indices), id: \.self) { postIndex in
+                                                        PostDetailItemView(
+                                                            post: postsForThisProfile[postIndex],
+                                                            isScrolling: $isScrolling
+                                                        )
+                                                        .tag(postIndex)
+                                                        .onAppear {
+                                                            // Preload adjacent posts
+                                                            preloadAdjacentPosts(profileIndex: profileIndex, postIndex: postIndex)
+                                                        }
+                                                    }
+                                                }
+                                                .tabViewStyle(.page(indexDisplayMode: .never))
+                                                .onAppear {
+                                                    // Ensure the correct post is selected when this TabView appears
+                                                    // Only for the first profile (virtualIndex == 0)
+                                                    if virtualIndex == 0 && currentPostIndices[profileIndex] != initialPostIndex {
+                                                        print("🔧 [TabView] Fixing initial selection for profile \(profileIndex): \(currentPostIndices[profileIndex]) → \(initialPostIndex)")
+                                                        DispatchQueue.main.async {
+                                                            currentPostIndices[profileIndex] = initialPostIndex
+                                                        }
+                                                    }
+                                                }
+                                            
+                                            // Dimming overlay based on scroll position
+                                            if shouldDim {
+                                                Color.black.opacity(0.3)
+                                                    .ignoresSafeArea()
+                                                    .allowsHitTesting(false)
+                                                    .animation(.easeInOut(duration: 0.2), value: shouldDim)
+                                            }
+                                            
+                                            // Bottom TabBar for THIS profile
                                         // Show TabBar for all profiles (not just current)
                                         if !postsForThisProfile.isEmpty {
                                             // Safely get current post index, default to 0 if not set
@@ -431,6 +444,7 @@ struct PostDetailCarouselView: View {
                                             .frame(maxWidth: .infinity)
                                             .background(Color.black)
                                         }
+                                    }
                                     }
                                     .frame(width: canvasWidth, height: canvasHeight)
                                     .background(
