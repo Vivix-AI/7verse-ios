@@ -48,12 +48,16 @@ class AudioSessionManager {
                 var frontOrBottomSource: AVAudioSessionDataSourceDescription? = nil
                 
                 for source in dataSources {
-                    let isFront: Bool = (source.orientation == AVAudioSession.Orientation.front)
-                    let isBottom: Bool = (source.location == AVAudioSession.Location.bottom)
-                    if isFront || isBottom {
+                    // Prefer front-facing microphone for optimal user voice capture
+                    if source.orientation == AVAudioSession.Orientation.front {
                         frontOrBottomSource = source
                         break
                     }
+                }
+                
+                // If no front mic found, use any available source
+                if frontOrBottomSource == nil && !dataSources.isEmpty {
+                    frontOrBottomSource = dataSources.first
                 }
                 
                 if let dataSource = frontOrBottomSource {
