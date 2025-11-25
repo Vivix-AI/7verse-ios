@@ -416,7 +416,7 @@ struct PostDetailCarouselView: View {
                                                             .fill(Color.white)
                                                     )
                                                 }
-                                                .padding(.trailing, 40)
+                                                .padding(.trailing, 24)
                                             }
                                             }
                                             .padding(.bottom, 12)
