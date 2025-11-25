@@ -692,6 +692,8 @@ struct WebViewSheet: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Close") {
+                        // Deactivate audio session when closing
+                        AudioSessionManager.shared.deactivate()
                         dismiss()
                     }
                     .foregroundColor(.white)
@@ -701,6 +703,15 @@ struct WebViewSheet: View {
             .toolbarBackground(.visible, for: .navigationBar)
         }
         .preferredColorScheme(.dark)
+        .onAppear {
+            // Configure audio session for voice with noise cancellation
+            AudioSessionManager.shared.configureForVoiceInput()
+            AudioSessionManager.shared.logAudioRoute()
+        }
+        .onDisappear {
+            // Clean up audio session
+            AudioSessionManager.shared.deactivate()
+        }
     }
 }
 

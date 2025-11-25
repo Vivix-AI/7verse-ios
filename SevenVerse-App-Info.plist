@@ -23,8 +23,8 @@
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>This app needs camera access to allow web interactions that use your camera.</string>
+	<string>This app needs camera access for web interactions.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>This app needs microphone access to allow web interactions that use your microphone.</string>
+	<string>This app needs microphone access for voice interactions and audio features.</string>
 </dict>
 </plist>
