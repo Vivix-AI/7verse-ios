@@ -361,105 +361,105 @@ struct PostDetailCarouselView: View {
                                                                 .frame(width: 6, height: 6)
                                                         }
                                                     }
-                                                    .padding(.bottom, 90) // Above TabBar (80pt) + 10pt spacing
+                                                    .padding(.bottom, 85) // Above TabBar (80pt) + 10pt spacing
                                                 }
                                                 .allowsHitTesting(false)
                                             }
                                             
                                             // Bottom TabBar for THIS profile
-                                        // Show TabBar for all profiles (not just current)
-                                        if !postsForThisProfile.isEmpty {
-                                            // Safely get current post index, default to 0 if not set
-                                            let currentPostIndex = currentPostIndices.indices.contains(profileIndex) 
-                                                ? min(currentPostIndices[profileIndex], postsForThisProfile.count - 1)
-                                                : 0
-                                            let currentProfilePost = postsForThisProfile[currentPostIndex]
-                                            
-                                            HStack(alignment: .center, spacing: 16) {
-                                            // Left: Like & Remix
-                                            HStack(spacing: 12) {
-                                                // Like
-                                                Button(action: {
-                                                    // TODO: Implement like functionality
-                                                }) {
-                                                    HStack(spacing: 5) {
-                                                        Image(systemName: "heart")
-                                                            .font(.system(size: 20, weight: .regular))
-                                                            .foregroundColor(.white)
-                                                        
-                                                        Text("\(currentProfilePost.likesCount)")
-                                                            .font(.system(size: 13, weight: .semibold))
-                                                            .foregroundColor(.white)
-                                                            .frame(minWidth: 30, alignment: .leading)
-                                                    }
-                                                    .frame(width: 44, height: 44)
-                                                    .contentShape(Rectangle())
-                                                }
+                                            // Show TabBar for all profiles (not just current)
+                                            if !postsForThisProfile.isEmpty {
+                                                // Safely get current post index, default to 0 if not set
+                                                let currentPostIndex = currentPostIndices.indices.contains(profileIndex)
+                                                    ? min(currentPostIndices[profileIndex], postsForThisProfile.count - 1)
+                                                    : 0
+                                                let currentProfilePost = postsForThisProfile[currentPostIndex]
                                                 
-                                                // Remix
-                                                Button(action: {
-                                                    // TODO: Implement remix functionality
-                                                }) {
-                                                    Image(systemName: "arrow.2.squarepath")
-                                                        .font(.system(size: 20, weight: .regular))
-                                                        .foregroundColor(.white)
-                                                        .frame(width: 44, height: 44)
-                                                        .contentShape(Rectangle())
+                                                HStack(alignment: .center, spacing: 16) {
+                                                    // Left: Like & Remix
+                                                    HStack(spacing: 12) {
+                                                        // Like
+                                                        Button(action: {
+                                                            // TODO: Implement like functionality
+                                                        }) {
+                                                            HStack(spacing: 5) {
+                                                                Image(systemName: "heart")
+                                                                    .font(.system(size: 20, weight: .regular))
+                                                                    .foregroundColor(.white)
+                                                                
+                                                                Text("\(currentProfilePost.likesCount)")
+                                                                    .font(.system(size: 13, weight: .semibold))
+                                                                    .foregroundColor(.white)
+                                                                    .frame(minWidth: 30, alignment: .leading)
+                                                            }
+                                                            .frame(width: 44, height: 44)
+                                                            .contentShape(Rectangle())
+                                                        }
+                                                        
+                                                        // Remix
+                                                        Button(action: {
+                                                            // TODO: Implement remix functionality
+                                                        }) {
+                                                            Image(systemName: "arrow.2.squarepath")
+                                                                .font(.system(size: 20, weight: .regular))
+                                                                .foregroundColor(.white)
+                                                                .frame(width: 44, height: 44)
+                                                                .contentShape(Rectangle())
+                                                        }
+                                                    }
+                                                    .padding(.leading, 24)
+                                                    
+                                                    Spacer()
+                                                    
+                                                    // Right: CTA Button
+                                                    if let ctaUrl = currentProfilePost.ctaUrl, !ctaUrl.isEmpty {
+                                                        Button(action: {
+                                                            // Safely get current post at click time (not from closure)
+                                                            guard currentPostIndices.indices.contains(profileIndex) else {
+                                                                print("❌ [CTA] Invalid profileIndex: \(profileIndex)")
+                                                                return
+                                                            }
+                                                            
+                                                            let posts = postsForThisProfile
+                                                            let postIdx = currentPostIndices[profileIndex]
+                                                            
+                                                            guard posts.indices.contains(postIdx) else {
+                                                                print("❌ [CTA] Invalid postIndex: \(postIdx)")
+                                                                return
+                                                            }
+                                                            
+                                                            let freshPost = posts[postIdx]
+                                                            
+                                                            if let freshCtaUrl = freshPost.ctaUrl,
+                                                               !freshCtaUrl.isEmpty,
+                                                               let url = URL(string: freshCtaUrl) {
+                                                                webViewURL = IdentifiableURL(url: url)
+                                                            } else {
+                                                                print("❌ [CTA] No valid CTA URL")
+                                                            }
+                                                        }) {
+                                                            HStack(spacing: 6) {
+                                                                Image(systemName: "hand.tap")
+                                                                    .font(.system(size: 14, weight: .medium))
+                                                                Text("Tap to Interact")
+                                                                    .font(.system(size: 13, weight: .semibold))
+                                                            }
+                                                            .foregroundColor(.black)
+                                                            .padding(.horizontal, 16)
+                                                            .padding(.vertical, 10)
+                                                            .background(
+                                                                Capsule()
+                                                                    .fill(Color.white)
+                                                            )
+                                                        }
+                                                        .padding(.trailing, 24)
+                                                    }
                                                 }
+                                                .padding(.bottom, 12)
+                                                .frame(height: 80)
+                                                .frame(maxWidth: .infinity)
+                                                .background(Color.black)
                                             }
-                                            .padding(.leading, 24)
-                        
-                        Spacer()
-                                            
-                                            // Right: CTA Button
-                                            if let ctaUrl = currentProfilePost.ctaUrl, !ctaUrl.isEmpty {
-                                                Button(action: {
-                                                    // Safely get current post at click time (not from closure)
-                                                    guard currentPostIndices.indices.contains(profileIndex) else {
-                                                        print("❌ [CTA] Invalid profileIndex: \(profileIndex)")
-                                                        return
-                                                    }
-                                                    
-                                                    let posts = postsForThisProfile
-                                                    let postIdx = currentPostIndices[profileIndex]
-                                                    
-                                                    guard posts.indices.contains(postIdx) else {
-                                                        print("❌ [CTA] Invalid postIndex: \(postIdx)")
-                                                        return
-                                                    }
-                                                    
-                                                    let freshPost = posts[postIdx]
-                                                    
-                                                    if let freshCtaUrl = freshPost.ctaUrl, 
-                                                       !freshCtaUrl.isEmpty,
-                                                       let url = URL(string: freshCtaUrl) {
-                                                        webViewURL = IdentifiableURL(url: url)
-                                                    } else {
-                                                        print("❌ [CTA] No valid CTA URL")
-                                                    }
-                                                }) {
-                                                    HStack(spacing: 6) {
-                                                        Image(systemName: "hand.tap")
-                                                            .font(.system(size: 14, weight: .medium))
-                                                        Text("Tap to Interact")
-                                                            .font(.system(size: 13, weight: .semibold))
-                                                    }
-                        .foregroundColor(.black)
-                                                    .padding(.horizontal, 16)
-                                                    .padding(.vertical, 10)
-                                                    .background(
-                                                        Capsule()
-                                                            .fill(Color.white)
-                                                    )
-                                                }
-                                                .padding(.trailing, 24)
-                                            }
-                                            }
-                                            .padding(.bottom, 12)
-                                            .frame(height: 80)
-                                            .frame(maxWidth: .infinity)
-                                            .background(Color.black)
-                                        }
                                     }
                                     }
                                     .frame(width: canvasWidth, height: canvasHeight)
