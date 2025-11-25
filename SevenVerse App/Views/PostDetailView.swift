@@ -361,7 +361,7 @@ struct PostDetailCarouselView: View {
                                                                 .frame(width: 6, height: 6)
                                                         }
                                                     }
-                                                    .padding(.bottom, 100) // Above TabBar (80pt) + spacing
+                                                    .padding(.bottom, 90) // Above TabBar (80pt) + 10pt spacing
                                                 }
                                                 .allowsHitTesting(false)
                                             }
