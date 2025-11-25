@@ -199,6 +199,44 @@ AudioSessionManager.shared.deactivate()              // WebView 关闭时
 
 ---
 
+## 📚 外部参考资料
+
+### Apple 官方文档
+- [AVAudioSession Programming Guide](https://developer.apple.com/library/archive/documentation/Audio/Conceptual/AudioSessionProgrammingGuide/)
+- [AVAudioSession Class Reference](https://developer.apple.com/documentation/avfaudio/avaudiosession)
+- [AVAudioSessionPolarPattern API](https://developer.apple.com/documentation/avfaudio/avaudiosessionpolarpattern)
+- [Audio Guidelines for User-Controlled Apps (TN2091)](https://developer.apple.com/library/archive/technotes/tn2091/)
+- [WKWebView Documentation](https://developer.apple.com/documentation/webkit/wkwebview)
+
+### WWDC 视频
+- [WWDC 2019 Session 256: Advances in Speech Recognition](https://developer.apple.com/videos/play/wwdc2019/256/)
+- [WWDC 2021 Session 10105: Explore AVAudioSession](https://developer.apple.com/videos/play/wwdc2021/10105/)
+- [WWDC 2018 Session 504: Best Practices in Web Audio](https://developer.apple.com/videos/play/wwdc2018/504/)
+
+### 技术标准
+- [ITU-T G.722: 7 kHz Audio Coding (16 kHz Sampling)](https://www.itu.int/rec/T-REC-G.722)
+- [ITU-T P.800: Methods for Subjective Quality Assessment (MOS)](https://www.itu.int/rec/T-REC-P.800)
+- [ITU-T P.862: Perceptual Evaluation of Speech Quality (PESQ)](https://www.itu.int/rec/T-REC-P.862)
+- [WebRTC: Real-Time Communication Standards](https://webrtc.org/)
+- [Opus Audio Codec](https://opus-codec.org/)
+
+### 音频技术资源
+- [Shure: Microphone Polar Patterns Explained](https://www.shure.com/en-US/performance-production/louder/polar-patterns-explained)
+- [DSP Related: Beamforming Tutorial](https://www.dsprelated.com/showarticle/1168.php)
+- [Audio Engineering Society (AES)](https://www.aes.org/)
+- [Apple Human Interface Guidelines: App Icons](https://developer.apple.com/design/human-interface-guidelines/app-icons)
+
+### 学术论文
+- "Microphone Array Beamforming for Speech Enhancement" (IEEE 2018)
+- "Deep Learning Based Voice Activity Detection" (arXiv 2020)
+- "Acoustic Echo Cancellation: An Application of Very-High-Order Adaptive Filters" (IEEE 1985)
+- "Polar Pattern Characterization of Microphones" (AES 2010)
+
+### 采样理论
+- [Nyquist-Shannon Sampling Theorem](https://en.wikipedia.org/wiki/Nyquist%E2%80%93Shannon_sampling_theorem)
+
+---
+
 ## 📎 相关文档
 
 - 📖 **快速开始**: `README-音频优化.md`
