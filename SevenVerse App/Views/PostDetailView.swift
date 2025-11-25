@@ -252,15 +252,15 @@ struct PostDetailCarouselView: View {
     
     @ViewBuilder
     private func mainContent(geometry: GeometryProxy) -> some View {
-        let screenWidth = geometry.size.width
-        let screenHeight = geometry.size.height
-        
-        // Calculate canvas dimensions (full screen for each profile)
-        // Canvas should fill the entire screen height
-        let canvasHeight = screenHeight
-        let canvasWidth = screenWidth
-        
-        ZStack {
+            let screenWidth = geometry.size.width
+            let screenHeight = geometry.size.height
+            
+            // Calculate canvas dimensions (full screen for each profile)
+            // Canvas should fill the entire screen height
+            let canvasHeight = screenHeight
+            let canvasWidth = screenWidth
+            
+                        ZStack {
                 // Canvas Area (ScrollView with posts) - full screen
                 Color.black.ignoresSafeArea()
                 
@@ -573,9 +573,9 @@ struct PostDetailCarouselView: View {
                 // Clean up timer
                 scrollTimer?.invalidate()
                 scrollTimer = nil
-            }
         }
     }
+}
 
 // MARK: - Post Detail Navigation Bar
 
@@ -685,17 +685,17 @@ struct WebViewSheet: View {
                 Color.black
                     .ignoresSafeArea()
                 
-                WebView(url: url)
+            WebView(url: url)
                     .background(Color.black)
             }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Close") {
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button("Close") {
                         // Deactivate audio session when closing
                         AudioSessionManager.shared.deactivate()
-                        dismiss()
-                    }
+                            dismiss()
+                        }
                     .foregroundColor(.white)
                 }
             }

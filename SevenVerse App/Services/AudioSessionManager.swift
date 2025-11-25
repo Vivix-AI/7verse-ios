@@ -20,7 +20,6 @@ class AudioSessionManager {
                 mode: .voiceChat,  // Enables automatic noise suppression, AGC, and echo cancellation
                 options: [
                     .defaultToSpeaker,              // Route to speaker (not receiver)
-                    .allowBluetooth,                // Support Bluetooth headsets
                     .allowBluetoothA2DP,            // High-quality Bluetooth audio
                     .mixWithOthers                  // Allow mixing with other audio (optional)
                 ]
@@ -45,8 +44,8 @@ class AudioSessionManager {
                 try audioSession.setPreferredInput(builtInMic)
                 
                 // Configure to use front-facing microphone for beamforming
-                if let dataSource = builtInMic.dataSources?.first(where: { 
-                    $0.orientation == .front || $0.location == .bottom
+                if let dataSource = builtInMic.dataSources?.first(where: { source in
+                    source.orientation == .front || source.location == .bottom
                 }) {
                     try builtInMic.setPreferredDataSource(dataSource)
                     print("   🎙️ Using mic: \(dataSource.dataSourceName)")
@@ -57,16 +56,16 @@ class AudioSessionManager {
                         print("   📊 Supported patterns: \(supportedPatterns.map { $0.rawValue })")
                         
                         // Try to set Cardioid (heart-shaped) pattern
-                        if let cardioid = supportedPatterns.first(where: { 
-                            $0 == .cardioid 
+                        if let cardioid = supportedPatterns.first(where: { pattern in
+                            pattern == AVAudioSession.PolarPattern.cardioid
                         }) {
                             try dataSource.setPreferredPolarPattern(cardioid)
                             print("   ❤️ Polar pattern: CARDIOID (optimal for VAD/ASR)")
                             print("      → Front: 0° = 0dB (max sensitivity)")
                             print("      → Sides: ±90° = -6dB (reduced)")
                             print("      → Back: 180° = -20dB (rejected)")
-                        } else if let subcardioid = supportedPatterns.first(where: {
-                            $0 == .subcardioid
+                        } else if let subcardioid = supportedPatterns.first(where: { pattern in
+                            pattern == AVAudioSession.PolarPattern.subcardioid
                         }) {
                             try dataSource.setPreferredPolarPattern(subcardioid)
                             print("   💛 Polar pattern: SUBCARDIOID (wide cardioid)")
@@ -120,7 +119,7 @@ class AudioSessionManager {
             try audioSession.setCategory(
                 .playAndRecord,
                 mode: .measurement,  // Minimal processing, maximum quality
-                options: [.defaultToSpeaker, .allowBluetooth]
+                options: [.defaultToSpeaker]
             )
             
             // Request highest sample rate and I/O buffer duration
@@ -145,7 +144,7 @@ class AudioSessionManager {
             try audioSession.setCategory(
                 .playAndRecord,
                 mode: .measurement,  // Minimal DSP processing, raw audio
-                options: [.defaultToSpeaker, .allowBluetooth, .allowBluetoothA2DP]
+                options: [.defaultToSpeaker, .allowBluetoothA2DP]
             )
             
             // 48kHz for studio-quality capture (server can downsample with better algorithms)
