@@ -45,7 +45,7 @@ class AudioSessionManager {
                 
                 // Configure to use front-facing microphone for beamforming
                 let dataSources = builtInMic.dataSources ?? []
-                let frontOrBottomSource = dataSources.first { source in
+                let frontOrBottomSource: AVAudioSessionDataSourceDescription? = dataSources.first { source in
                     let isFront = (source.orientation == .front)
                     let isBottom = (source.location == .bottom)
                     return isFront || isBottom
