@@ -138,9 +138,6 @@ class APIService {
             throw error
         }
     }
-            throw error
-        }
-    }
     
     // MARK: - Post Interactions
     
