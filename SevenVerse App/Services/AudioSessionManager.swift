@@ -38,7 +38,7 @@ class AudioSessionManager {
             try audioSession.setPreferredIOBufferDuration(0.010)  // 10ms
             print("   ⚡ Buffer duration: 10ms (fast VAD response)")
             
-            // STEP 4: Set preferred input channels
+            // STEP 4: Set preferred input channels and polar pattern
             // Mono is best for ASR (reduces data, improves processing speed)
             if let availableInputs = audioSession.availableInputs,
                let builtInMic = availableInputs.first(where: { $0.portType == .builtInMic }) {
@@ -49,8 +49,31 @@ class AudioSessionManager {
                     $0.orientation == .front || $0.location == .bottom
                 }) {
                     try builtInMic.setPreferredDataSource(dataSource)
-                    print("   🎙️ Using front/bottom mic: \(dataSource.dataSourceName)")
-                    print("   📍 Polar pattern: \(dataSource.selectedPolarPattern?.rawValue ?? "default")")
+                    print("   🎙️ Using mic: \(dataSource.dataSourceName)")
+                    
+                    // CRITICAL: Set Cardioid polar pattern for VAD/ASR
+                    // Cardioid = heart-shaped pickup (front sensitive, sides reduced, back rejected)
+                    if let supportedPatterns = dataSource.supportedPolarPatterns {
+                        print("   📊 Supported patterns: \(supportedPatterns.map { $0.rawValue })")
+                        
+                        // Try to set Cardioid (heart-shaped) pattern
+                        if let cardioid = supportedPatterns.first(where: { 
+                            $0 == .cardioid 
+                        }) {
+                            try dataSource.setPreferredPolarPattern(cardioid)
+                            print("   ❤️ Polar pattern: CARDIOID (optimal for VAD/ASR)")
+                            print("      → Front: 0° = 0dB (max sensitivity)")
+                            print("      → Sides: ±90° = -6dB (reduced)")
+                            print("      → Back: 180° = -20dB (rejected)")
+                        } else if let subcardioid = supportedPatterns.first(where: {
+                            $0 == .subcardioid
+                        }) {
+                            try dataSource.setPreferredPolarPattern(subcardioid)
+                            print("   💛 Polar pattern: SUBCARDIOID (wide cardioid)")
+                        } else {
+                            print("   📍 Polar pattern: \(dataSource.selectedPolarPattern?.rawValue ?? "default")")
+                        }
+                    }
                 }
                 
                 try audioSession.setPreferredInputNumberOfChannels(1)  // Mono for ASR
