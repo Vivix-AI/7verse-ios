@@ -44,9 +44,14 @@ class AudioSessionManager {
                 try audioSession.setPreferredInput(builtInMic)
                 
                 // Configure to use front-facing microphone for beamforming
-                if let dataSource = builtInMic.dataSources?.first(where: { source in
-                    source.orientation == .front || source.location == .bottom
-                }) {
+                let dataSources = builtInMic.dataSources ?? []
+                let frontOrBottomSource = dataSources.first { source in
+                    let isFront = (source.orientation == .front)
+                    let isBottom = (source.location == .bottom)
+                    return isFront || isBottom
+                }
+                
+                if let dataSource = frontOrBottomSource {
                     try builtInMic.setPreferredDataSource(dataSource)
                     print("   🎙️ Using mic: \(dataSource.dataSourceName)")
                     
