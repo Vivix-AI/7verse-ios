@@ -397,18 +397,49 @@ Legend: ✅ Full support | ⚠️ Partial support | ❌ Not supported
 - [AVAudioSession Programming Guide](https://developer.apple.com/documentation/avfaudio/avaudiosession)
 - [Audio Session Categories and Modes](https://developer.apple.com/documentation/avfaudio/avaudiosession/category)
 - [Microphone Configuration Best Practices](https://developer.apple.com/documentation/avfaudio/avaudiosession/1616557-setpreferredinput)
+- [AVAudioSession Data Sources](https://developer.apple.com/documentation/avfaudio/avaudiosessiondatasourcedescription)
+- [Audio Session Polar Patterns](https://developer.apple.com/documentation/avfaudio/avaudiosession/polarpattern)
+- [WKWebView Media Capture](https://developer.apple.com/documentation/webkit/wkwebview)
+- [Core Audio Overview](https://developer.apple.com/library/archive/documentation/MusicAudio/Conceptual/CoreAudioOverview/)
+- [WWDC 2022: Create rich audio experiences](https://developer.apple.com/videos/play/wwdc2022/10093/)
+- [WWDC 2021: Support spatial audio in your app](https://developer.apple.com/videos/play/wwdc2021/10265/)
 
 ### Technical Standards
 
-- **ITU-T P.800**: Methods for subjective determination of transmission quality
-- **ITU-T P.862**: Perceptual evaluation of speech quality (PESQ)
-- **3GPP TS 26.131**: Terminal acoustic characteristics for telephony
+- **ITU-T P.800**: [Methods for subjective determination of transmission quality](https://www.itu.int/rec/T-REC-P.800)
+- **ITU-T P.862**: [Perceptual evaluation of speech quality (PESQ)](https://www.itu.int/rec/T-REC-P.862)
+- **3GPP TS 26.131**: [Terminal acoustic characteristics for telephony](https://www.3gpp.org/DynaReport/26131.htm)
+- **IEEE 1857.10**: [Acoustic echo cancellation standard](https://standards.ieee.org/ieee/1857.10/7394/)
 
-### Research Papers
+### Research Papers & Patents
 
-- Apple's Acoustic Echo Cancellation patents (US 10,419,852)
-- Deep Learning-based Speech Enhancement (Microsoft Research)
-- Microphone Array Processing (Benesty et al., 2008)
+- **Apple Patent US 10,419,852**: [Acoustic echo cancellation](https://patents.google.com/patent/US10419852B2)
+- **Apple Patent US 10,269,369**: [Beamforming microphone array](https://patents.google.com/patent/US10269369B2)
+- **Microsoft Research**: [Deep Learning-based Speech Enhancement](https://www.microsoft.com/en-us/research/publication/speech-enhancement-using-deep-neural-networks/)
+- **Benesty et al. (2008)**: [Microphone Array Signal Processing](https://link.springer.com/book/10.1007/978-3-540-78612-2)
+- **Google Research**: [Whisper ASR Model Architecture](https://github.com/openai/whisper)
+- **Choi et al. (2019)**: [Phase-aware Speech Enhancement with Deep Complex U-Net](https://arxiv.org/abs/1903.03107)
+
+### Industry Resources
+
+- [Web Audio API Specification (W3C)](https://www.w3.org/TR/webaudio/)
+- [WebRTC Audio Processing](https://webrtc.googlesource.com/src/+/refs/heads/main/modules/audio_processing/)
+- [Opus Audio Codec](https://opus-codec.org/) - Low-latency audio compression
+- [SoX - Sound eXchange](http://sox.sourceforge.net/) - Audio processing reference
+
+### Community & Forums
+
+- [Apple Developer Forums - Audio](https://developer.apple.com/forums/tags/audio)
+- [Stack Overflow - AVAudioSession](https://stackoverflow.com/questions/tagged/avaudiosession)
+- [AudioKit Community](https://audiokit.io/) - Open-source audio framework
+- [Core Audio Mailing List Archives](https://lists.apple.com/archives/coreaudio-api/)
+
+### Tools & Libraries
+
+- [AudioKit](https://github.com/AudioKit/AudioKit) - Audio synthesis and processing
+- [TPCircularBuffer](https://github.com/michaeltyson/TPCircularBuffer) - Lock-free circular buffer
+- [novocaine](https://github.com/alexbw/novocaine) - Painless audio on iOS
+- [EZAudio](https://github.com/syedhali/EZAudio) - Audio visualization framework
 
 ---
 
